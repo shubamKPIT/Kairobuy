@@ -57,27 +57,6 @@ const priceOptionToQueryMap = {
 /* Shared page gutter: 16px on phones, 24px tablet, 32px desktop */
 const GUTTER = "px-4 sm:px-6 lg:px-8";
 
-function ProductGridSkeleton({ count = 8 }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
-      {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="overflow-hidden rounded-2xl border border-zinc-200 bg-white"
-        >
-          <div className="aspect-[4/4.7] animate-pulse bg-zinc-200" />
-
-          <div className="space-y-3 p-3 sm:p-4">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-zinc-200" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-zinc-100" />
-            <div className="h-9 animate-pulse rounded-full bg-zinc-100" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function ProductRow({ products }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
@@ -259,37 +238,6 @@ function FilterContent({
   );
 }
 
-function CategoryMediaSkeleton() {
-  return (
-    <main className="min-h-screen bg-zinc-50">
-      <section className="relative min-h-[480px] animate-pulse overflow-hidden bg-zinc-900 sm:min-h-[450px] lg:min-h-[560px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-800 to-zinc-700" />
-
-        <div className={`relative mx-auto flex min-h-[480px] max-w-full items-end py-10 sm:min-h-[450px] sm:py-14 lg:min-h-[560px] ${GUTTER}`}>
-          <div className="w-full max-w-2xl">
-            <div className="h-3 w-28 rounded bg-white/20" />
-            <div className="mt-6 h-14 max-w-md rounded bg-white/20 sm:h-20" />
-            <div className="mt-5 h-5 max-w-xl rounded bg-white/15" />
-            <div className="mt-3 h-5 max-w-lg rounded bg-white/15" />
-            <div className="mt-8 h-12 w-44 rounded-full bg-white/20" />
-          </div>
-        </div>
-      </section>
-
-      <section className={`mx-auto max-w-full py-10 sm:py-16 ${GUTTER}`}>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-56 animate-pulse rounded-2xl bg-zinc-200 sm:h-72"
-            />
-          ))}
-        </div>
-      </section>
-    </main>
-  );
-}
-
 export default function CategoryPageClient({
   initialMediaOverrides,
   initialProducts = [],
@@ -298,14 +246,21 @@ export default function CategoryPageClient({
   const params = useParams();
   const searchParams = useSearchParams();
 
+  const segments = Array.isArray(params?.segments)
+    ? params.segments
+    : params?.segments
+      ? [params.segments]
+      : ["all"];
+
+  const departmentSlug = String(segments[0] || "all").toLowerCase();
+  const subcategorySlug = segments[1] ? String(segments[1]).toLowerCase() : "";
+
+  // Price filter lives in the URL, so it is derived rather than stored in state
   const priceQuery = String(searchParams.get("price") || "").toLowerCase();
+  const selectedPrice = priceQueryMap[priceQuery] || "All";
 
-  const selectedPriceFromUrl = priceQueryMap[priceQuery] || "All";
   const handlePriceChange = (nextPrice) => {
-    setSelectedPrice(nextPrice);
-
     const nextSearchParams = new URLSearchParams(searchParams.toString());
-
     const priceQueryValue = priceOptionToQueryMap[nextPrice];
 
     if (nextPrice === "All" || !priceQueryValue) {
@@ -324,16 +279,6 @@ export default function CategoryPageClient({
       scroll: false,
     });
   };
-
-  const segments = Array.isArray(params?.segments)
-    ? params.segments
-    : params?.segments
-      ? [params.segments]
-      : ["all"];
-
-  const departmentSlug = String(segments[0] || "all").toLowerCase();
-
-  const subcategorySlug = segments[1] ? String(segments[1]).toLowerCase() : "";
 
   const [mediaOverrides] = useState(initialMediaOverrides || {});
 
@@ -364,33 +309,25 @@ export default function CategoryPageClient({
     ? subcategory.description
     : department?.subtitle || "";
 
-  // Products come from server; no client fetch
-  const [products, setProducts] = useState(initialProducts);
-  console.log("CategoryPageClient initialProducts:", initialProducts);
-  console.log("CategoryPageClient products state:", products);
-  console.log("CategoryPageClient department:", department);
-  console.log("CategoryPageClient finalProducts:", finalProducts);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Products come from the server. The parent page remounts this component
+  // per route (via `key`), so reading the prop directly is always current.
+  const products = initialProducts;
 
   const [selectedFilter, setSelectedFilter] = useState("All");
-  const [selectedPrice, setSelectedPrice] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
   const [sortOption, setSortOption] = useState("Newest");
 
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  // No useEffect that calls fetchProducts
-
+  // Reset local filters when the route changes
   useEffect(() => {
     setSelectedFilter("All");
-    setSelectedPrice(selectedPriceFromUrl);
     setSelectedBrand("All");
     setSortOption("Newest");
     setIsMobileFiltersOpen(false);
     setIsSortOpen(false);
-  }, [departmentSlug, subcategorySlug, selectedPriceFromUrl]);
+  }, [departmentSlug, subcategorySlug]);
 
   useEffect(() => {
     if (!isMobileFiltersOpen) {
@@ -594,15 +531,12 @@ export default function CategoryPageClient({
     department.subcategories.length > 0;
 
   const shouldShowNewProducts =
-    !isLoading && !isNewDropsPage && !subcategory && newProducts.length > 0;
+    !isNewDropsPage && !subcategory && newProducts.length > 0;
 
   const shouldShowFeaturedProducts =
-    !isLoading &&
-    !isNewDropsPage &&
-    !subcategory &&
-    featuredProducts.length > 0;
+    !isNewDropsPage && !subcategory && featuredProducts.length > 0;
 
-  const shouldShowBrands = !isLoading && !subcategory && brands.length > 0;
+  const shouldShowBrands = !subcategory && brands.length > 0;
 
   const scrollToProducts = () =>
     document.getElementById("products")?.scrollIntoView({
@@ -921,11 +855,9 @@ export default function CategoryPageClient({
                 </h2>
 
                 <p className="mt-2 text-xs text-zinc-500 sm:text-sm">
-                  {isLoading
-                    ? "Loading products..."
-                    : `Showing ${finalProducts.length} product${
-                        finalProducts.length === 1 ? "" : "s"
-                      }`}
+                  {`Showing ${finalProducts.length} product${
+                    finalProducts.length === 1 ? "" : "s"
+                  }`}
                 </p>
               </div>
 
@@ -967,15 +899,7 @@ export default function CategoryPageClient({
               </div>
             </div>
 
-            {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 sm:p-6">
-                <p className="font-bold">Unable to load products.</p>
-
-                <p className="mt-1 text-sm">{error}</p>
-              </div>
-            ) : isLoading ? (
-              <ProductGridSkeleton />
-            ) : finalProducts.length === 0 ? (
+            {finalProducts.length === 0 ? (
               <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-center sm:min-h-80 sm:p-8">
                 <div>
                   <h3 className="text-lg font-black tracking-tight text-zinc-950 sm:text-xl">
@@ -991,9 +915,9 @@ export default function CategoryPageClient({
                     type="button"
                     onClick={() => {
                       setSelectedFilter("All");
-                      setSelectedPrice("All");
                       setSelectedBrand("All");
                       setSortOption("Newest");
+                      handlePriceChange("All");
                     }}
                     className="mt-5 rounded-full bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
                   >
