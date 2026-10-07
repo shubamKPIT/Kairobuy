@@ -1,9 +1,9 @@
 import CategoryPageClient from "./CategoryPageClient";
 import { getMediaOverrides } from "../../../lib/getMediaOverrides";
-import { fetchProducts } from "../../../services/productService";
+import { getProducts } from "../../../lib/getProducts";
 
-// Re-fetch at most once a minute. Switch back to
-// `export const dynamic = "force-dynamic";` if you need data fresh on every request.
+// Re-fetch at most once a minute. Switch to
+// `export const dynamic = "force-dynamic";` for data fresh on every request.
 export const revalidate = 60;
 
 const departmentKeyMap = {
@@ -17,7 +17,6 @@ const departmentKeyMap = {
 };
 
 export default async function CategoryPage({ params }) {
-  // params is a Promise in the App Router; fetch it alongside media overrides
   const [initialMediaOverrides, resolvedParams] = await Promise.all([
     getMediaOverrides(),
     params,
@@ -34,36 +33,26 @@ export default async function CategoryPage({ params }) {
 
   const departmentKey = departmentKeyMap[departmentSlug] || "ALL";
 
-  const filters = {};
-
-  // "ALL" and "NEW" are not real departments, so don't filter by them
-  if (departmentKey !== "ALL" && departmentKey !== "NEW") {
-    filters.department = departmentKey;
-  }
-
-  if (subcategorySlug) {
-    filters.subcategory = subcategorySlug;
-  }
-
-  if (departmentSlug === "new") {
-    // Make sure this matches the field your fetchProducts expects
-    // (the client reads product.newCategory === "new")
-    filters.category = "new";
-  }
+  const filters = {
+    // "ALL" and "NEW" are not real departments
+    department:
+      departmentKey !== "ALL" && departmentKey !== "NEW"
+        ? departmentKey
+        : undefined,
+    subcategory: subcategorySlug || undefined,
+    newOnly: departmentSlug === "new",
+  };
 
   let initialProducts = [];
 
   try {
-    const response = await fetchProducts(undefined, filters);
-    const productList = response?.products || response || [];
-    initialProducts = Array.isArray(productList) ? productList : [];
+    initialProducts = await getProducts(filters);
   } catch (error) {
     console.error("Category page product fetch error:", error);
   }
 
   return (
     <CategoryPageClient
-      // Remount per route so product and filter state never go stale
       key={segments.join("/")}
       initialMediaOverrides={initialMediaOverrides}
       initialProducts={initialProducts}
