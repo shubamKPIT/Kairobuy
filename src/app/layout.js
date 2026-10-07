@@ -3,8 +3,15 @@ import AppProviders from "../context/AppProviders";
 import StorefrontShell from "../components/layout/StorefrontShell";
 
 export const metadata = {
-  title: "Kairobuy",
+  metadataBase: new URL("https://kairobuy.com"),
+  title: {
+    default: "Kairobuy",
+    template: "%s | Kairobuy",
+  },
   description: "A modern shopping experience.",
+  verification: {
+    google: "nk_QiSqNncqxTWMVF0mWdz3H71oB9K4e852NybTMCE8",
+  },
 };
 
 export default function RootLayout({ children }) {
