@@ -48,7 +48,10 @@ function getHighlights(description) {
 
 function Stars({ value, size = 15 }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${value} out of 5 stars`}>
+    <div
+      className="flex items-center gap-0.5"
+      aria-label={`${value} out of 5 stars`}
+    >
       {Array.from({ length: 5 }).map((_, i) => (
         <FiStar
           key={i}
@@ -224,7 +227,16 @@ export default function ProductDetailsPage() {
       ? product.notes
       : Array.isArray(product.tags) && product.tags.length > 0
         ? product.tags
-        : ["Fresh Spicy", "Amber", "Citrus", "Aromatic", "Musky", "Woody", "Lavender", "Warm Spicy"];
+        : [
+            "Fresh Spicy",
+            "Amber",
+            "Citrus",
+            "Aromatic",
+            "Musky",
+            "Woody",
+            "Lavender",
+            "Warm Spicy",
+          ];
 
   const handleToggleWishlist = () => {
     toggleWishlist(product);
@@ -285,7 +297,8 @@ export default function ProductDetailsPage() {
   };
 
   // Extract any raw specifications if stored as an object or key-value array on product
-  const rawSpecifications = product.specifications || product.specs || product.details;
+  const rawSpecifications =
+    product.specifications || product.specs || product.details;
   const specificationsList = Array.isArray(rawSpecifications)
     ? rawSpecifications
     : typeof rawSpecifications === "object" && rawSpecifications !== null
@@ -296,8 +309,8 @@ export default function ProductDetailsPage() {
       : [];
 
   return (
-    <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FDFDFD] text-zinc-900 pb-24 lg:pb-16 antialiased">
-  <div className="mx-auto w-full max-w-full min-w-0 px-3 sm:px-6 lg:px-8">
+    <main className="min-h-screen w-full max-w-full overflow-x-clip bg-[#FDFDFD] text-zinc-900 pb-24 lg:pb-16 antialiased">
+      <div className="mx-auto w-full max-w-full min-w-0 px-3 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation: < Home / Products */}
         <nav className="flex min-w-0 items-center gap-2 py-4 text-xs text-zinc-500 sm:py-5">
           <button
@@ -319,11 +332,10 @@ export default function ProductDetailsPage() {
 
         {/* Top Product Showcase */}
         <div className="grid w-full min-w-0 gap-6 sm:gap-10 lg:grid-cols-12 lg:gap-14">
-
-          {/* Column 1: Gallery with rounded aesthetic */}
+          {/* Column 1: Gallery */}
           <div className="min-w-0 w-full lg:col-span-6">
-            <div className="lg:sticky lg:top-22">
-              <div className="overflow-hidden rounded-3xl ">
+            <div className="lg:sticky lg:top-24">
+              <div className="overflow-hidden rounded-3xl">
                 <ProductGallery
                   product={product}
                   isInWishlist={isProductInWishlist}
@@ -427,7 +439,7 @@ export default function ProductDetailsPage() {
                 onClick={() => setIsDescOpen((prev) => !prev)}
                 className="flex w-full items-center justify-between text-left text-sm font-semibold text-zinc-900"
               >
-                <span className="text-amber-700" >Description</span>
+                <span className="text-amber-700">Description</span>
                 {isDescOpen ? (
                   <FiChevronUp size={18} className="text-zinc-500" />
                 ) : (
@@ -522,7 +534,6 @@ export default function ProductDetailsPage() {
                 </a>
               ) : (
                 <div className="grid w-full min-w-0 grid-cols-[minmax(0,7rem)_minmax(0,1fr)] gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3">
-
                   {/* Quantity Stepper */}
                   {isInStock && (
                     <div className="flex h-12 w-28 items-center justify-between rounded-xl bg-zinc-900 px-2.5 text-white sm:w-32 sm:px-3">
@@ -561,7 +572,9 @@ export default function ProductDetailsPage() {
                     type="button"
                     disabled={!isInStock}
                     onClick={
-                      cartItem ? () => router.push("/checkout") : handleAddToCart
+                      cartItem
+                        ? () => router.push("/checkout")
+                        : handleAddToCart
                     }
                     className={`h-12 whitespace-nowrap rounded-full border border-zinc-200 bg-[#F2F2F2] px-4 text-sm font-medium text-zinc-900 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 sm:flex-1 sm:px-0 ${
                       isInStock ? "" : "col-span-2 sm:col-span-1"
@@ -623,9 +636,13 @@ export default function ProductDetailsPage() {
                         <FiPercent size={14} />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-bold text-emerald-600/80">Discount</p>
+                        <p className="text-[10px] uppercase font-bold text-emerald-600/80">
+                          Discount
+                        </p>
                         <p className="text-xs font-semibold text-emerald-700">
-                          {hasDiscount ? `Disc ${discountPercentage}%` : "Seasonal Offers"}
+                          {hasDiscount
+                            ? `Disc ${discountPercentage}%`
+                            : "Seasonal Offers"}
                         </p>
                       </div>
                     </div>
@@ -636,8 +653,12 @@ export default function ProductDetailsPage() {
                         <FiCreditCard size={14} />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-bold text-sky-600/80">Payment</p>
-                        <p className="text-xs font-semibold text-sky-700">Cash on Delivery/Online Payment</p>
+                        <p className="text-[10px] uppercase font-bold text-sky-600/80">
+                          Payment
+                        </p>
+                        <p className="text-xs font-semibold text-sky-700">
+                          Cash on Delivery/Online Payment
+                        </p>
                       </div>
                     </div>
 
@@ -647,8 +668,12 @@ export default function ProductDetailsPage() {
                         <FiTruck size={14} />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-bold text-amber-600/80">Delivery Time</p>
-                        <p className="text-xs font-semibold text-amber-700">5-7 Working Days</p>
+                        <p className="text-[10px] uppercase font-bold text-amber-600/80">
+                          Delivery Time
+                        </p>
+                        <p className="text-xs font-semibold text-amber-700">
+                          5-7 Working Days
+                        </p>
                       </div>
                     </div>
 
@@ -658,8 +683,12 @@ export default function ProductDetailsPage() {
                         <FiRotateCcw size={14} />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-bold text-violet-600/80">Return & Warranty</p>
-                        <p className="text-xs font-semibold text-violet-700">7 Days Easy Return</p>
+                        <p className="text-[10px] uppercase font-bold text-violet-600/80">
+                          Return & Warranty
+                        </p>
+                        <p className="text-xs font-semibold text-violet-700">
+                          7 Days Easy Return
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -721,7 +750,6 @@ export default function ProductDetailsPage() {
         {/* Rating & Reviews Section */}
         <section id="reviews" className="w-full min-w-0 space-y-8">
           <div className="grid w-full min-w-0 gap-8 md:grid-cols-12 md:items-center">
-
             {/* Rating breakdown */}
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6 md:col-span-6">
               <div className="flex items-baseline gap-1">
@@ -733,15 +761,25 @@ export default function ProductDetailsPage() {
 
               <div className="w-full min-w-0 max-w-xs flex-1 space-y-1.5">
                 {[5, 4, 3, 2, 1].map((starNum) => (
-                  <div key={starNum} className="flex min-w-0 items-center gap-2 text-xs text-zinc-500">
+                  <div
+                    key={starNum}
+                    className="flex min-w-0 items-center gap-2 text-xs text-zinc-500"
+                  >
                     <span className="flex items-center gap-0.5 w-6">
-                      <FiStar size={11} className="fill-amber-500 text-amber-400" />
+                      <FiStar
+                        size={11}
+                        className="fill-amber-500 text-amber-400"
+                      />
                       <span>{starNum}</span>
                     </span>
                     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
                       <div
                         className={`h-full rounded-full bg-amber-400 ${
-                          starNum === 5 ? "w-4/5" : starNum === 4 ? "w-2/5" : "w-1/12"
+                          starNum === 5
+                            ? "w-4/5"
+                            : starNum === 4
+                              ? "w-2/5"
+                              : "w-1/12"
                         }`}
                       />
                     </div>
@@ -786,12 +824,10 @@ export default function ProductDetailsPage() {
           />
         </section>
 
-
         {/* Similar Products */}
         <section className="space-y-6">
           <SimilarProducts product={product} />
         </section>
-
       </div>
 
       {/* Mobile Sticky Bar */}
