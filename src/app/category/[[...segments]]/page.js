@@ -59,3 +59,9 @@ export default async function CategoryPage({ params }) {
     />
   );
 }
+
+export function generateStaticParams() {
+  return ["all", "new", "men", "women", "kids", "home", "accessories"].map(
+    (slug) => ({ segments: [slug] }),
+  );
+}
