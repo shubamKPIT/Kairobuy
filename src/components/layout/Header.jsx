@@ -23,8 +23,8 @@ import { departmentData } from "../../data/departmentData";
 import { searchProducts } from "../../services/productService";
 import CartDrawer from "../cart/CartDrawer";
 
-const LOGO_DEFAULT = "/images/Kairobuy_logo_transparent.png";
-const LOGO_WHITE = "/images/Kairobuy-transparent-white-logo.png";
+const LOGO_DEFAULT = "/images/kairobuy_logo_transparent.png";
+const LOGO_WHITE = "/images/kairobuy-transparent-white-logo.png";
 
 const navLinks = [
   { name: "Men", href: "/category/men", department: "men" },
