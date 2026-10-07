@@ -156,7 +156,7 @@ export async function POST(request, { params }) {
       { productId: id, userId: user._id },
       {
         $set: {
-          userName: user.name || "Roto customer",
+          userName: user.name || "Kairobuy customer",
           rating,
           title,
           comment,

@@ -98,7 +98,7 @@ export default function WishlistPage() {
             </h2>
 
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-zinc-500">
-              Explore the Roto collection and tap the heart icon on any product
+              Explore the Kairobuy collection and tap the heart icon on any product
               you want to save for later.
             </p>
 

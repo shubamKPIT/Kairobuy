@@ -178,7 +178,7 @@ export default function MyOrdersPage() {
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-zinc-600">
-              Track all the orders you have placed with Roto.
+              Track all the orders you have placed with Kairobuy.
             </p>
           </div>
 
@@ -219,7 +219,7 @@ export default function MyOrdersPage() {
             </h2>
 
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-zinc-500">
-              Products you purchase from Roto will appear here with their
+              Products you purchase from Kairobuy will appear here with their
               delivery and payment status.
             </p>
 

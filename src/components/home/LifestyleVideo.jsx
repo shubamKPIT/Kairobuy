@@ -21,24 +21,39 @@ import {
 
 const EASE = [0.22, 1, 0.36, 1];
 
-/* ---------- Animation variants (transform + opacity only) ---------- */
-
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
 };
 
 const rise = {
   hidden: { y: "115%" },
-  visible: { y: "0%", transition: { duration: 0.9, ease: EASE } },
+  visible: {
+    y: "0%",
+    transition: {
+      duration: 0.9,
+      ease: EASE,
+    },
+  },
 };
 
 const soft = {
   hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.75,
+      ease: EASE,
+    },
+  },
 };
 
-/* Number that counts up once when it scrolls into view */
 function Counter({ value, suffix }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
@@ -46,6 +61,7 @@ function Counter({ value, suffix }) {
 
   useEffect(() => {
     const node = ref.current;
+
     if (!node || !inView) return;
 
     if (reduceMotion) {
@@ -73,31 +89,78 @@ export default function LifestyleVideo() {
   const videoRef = useRef(null);
 
   const [isMuted, setIsMuted] = useState(true);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
   const reduceMotion = useReducedMotion();
 
-  // Slow parallax: the video drifts inside its frame as you scroll
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
+
   const videoY = useTransform(scrollYProgress, [0, 1], ["6%", "-6%"]);
 
-  // Only play while on screen (saves CPU and battery)
-  const isVideoInView = useInView(frameRef, { amount: 0.15 });
+  const isVideoInView = useInView(frameRef, {
+    amount: 0.15,
+  });
 
+  /*
+   * Lazy-load video when it gets close to viewport.
+   *
+   * rootMargin: 500px means the video starts loading
+   * when it is approximately 500px away from viewport.
+   */
+  useEffect(() => {
+    const frame = frameRef.current;
+    const video = videoRef.current;
+
+    if (!frame || !video || videoLoaded) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        const source = document.createElement("source");
+
+        source.src = "/videos/section4-compressed.mp4";
+        source.type = "video/mp4";
+
+        video.appendChild(source);
+        video.load();
+
+        setVideoLoaded(true);
+
+        observer.disconnect();
+      },
+      {
+        rootMargin: "500px 0px",
+        threshold: 0,
+      },
+    );
+
+    observer.observe(frame);
+
+    return () => observer.disconnect();
+  }, [videoLoaded]);
+
+  /*
+   * Only play while visible.
+   */
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+
+    if (!video || !videoLoaded) return;
 
     if (isVideoInView) {
       video.play().catch(() => {});
     } else {
       video.pause();
     }
-  }, [isVideoInView]);
+  }, [isVideoInView, videoLoaded]);
 
   const toggleMute = () => {
     const video = videoRef.current;
+
     if (!video) return;
 
     video.muted = !video.muted;
@@ -110,12 +173,15 @@ export default function LifestyleVideo() {
       className="overflow-hidden bg-gray-50 px-6 py-6 pb-12"
     >
       <div className="mx-auto grid max-w-full grid-cols-1 items-center gap-12 sm:gap-14 md:grid-cols-2 md:gap-12 lg:gap-16 lg:px-6">
-        {/* ================= LEFT: TEXT ================= */}
+        {/* LEFT */}
         <motion.div
           variants={container}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{
+            once: true,
+            amount: 0.3,
+          }}
           className="flex flex-col justify-center text-black"
         >
           <motion.p
@@ -129,12 +195,19 @@ export default function LifestyleVideo() {
             aria-label="Elevate your style."
             className="text-3xl font-black uppercase leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
           >
-            <span aria-hidden="true" className="block overflow-hidden py-[0.06em]">
+            <span
+              aria-hidden="true"
+              className="block overflow-hidden py-[0.06em]"
+            >
               <motion.span variants={rise} className="block">
                 Elevate
               </motion.span>
             </span>
-            <span aria-hidden="true" className="block overflow-hidden py-[0.06em]">
+
+            <span
+              aria-hidden="true"
+              className="block overflow-hidden py-[0.06em]"
+            >
               <motion.span variants={rise} className="block text-black/25">
                 your style.
               </motion.span>
@@ -151,12 +224,15 @@ export default function LifestyleVideo() {
             </p>
 
             <p>
-              From daily carry to weekend runs, every piece is chosen to hold
-              up and look good doing it.
+              From daily carry to weekend runs, every piece is chosen to hold up
+              and look good doing it.
             </p>
           </motion.div>
 
-          <motion.div variants={soft} className="mt-7 flex flex-wrap gap-3 sm:mt-8">
+          <motion.div
+            variants={soft}
+            className="mt-7 flex flex-wrap gap-3 sm:mt-8"
+          >
             <Link
               href="/category/all"
               className="group/btn relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-zinc-950 bg-zinc-950 px-6 py-3.5 text-sm font-extrabold text-white transition-colors duration-300 hover:text-zinc-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950"
@@ -165,7 +241,9 @@ export default function LifestyleVideo() {
                 aria-hidden="true"
                 className="absolute inset-0 translate-y-full bg-white transition-transform duration-500 ease-out group-hover/btn:translate-y-0"
               />
+
               <span className="relative">Shop the collection</span>
+
               <FiArrowUpRight
                 size={17}
                 className="relative transition-transform duration-300 group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5"
@@ -181,7 +259,6 @@ export default function LifestyleVideo() {
             </Link>
           </motion.div>
 
-          {/* Divider row */}
           <motion.div
             variants={soft}
             className="mt-8 border-t border-black/10 pt-5 sm:mt-10 sm:pt-6 md:mt-12 md:pt-7"
@@ -204,12 +281,24 @@ export default function LifestyleVideo() {
           </motion.div>
         </motion.div>
 
-        {/* ================= RIGHT: VIDEO ================= */}
+        {/* RIGHT */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.95, ease: EASE }}
+          initial={{
+            opacity: 0,
+            y: 60,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          transition={{
+            duration: 0.95,
+            ease: EASE,
+          }}
           className="relative pb-5"
         >
           <div
@@ -218,13 +307,14 @@ export default function LifestyleVideo() {
           >
             <motion.video
               ref={videoRef}
-              src="/videos/section4.mp4"
-              autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
-              style={{ y: reduceMotion ? 0 : videoY, scale: 1.15 }}
+              preload="none"
+              style={{
+                y: reduceMotion ? 0 : videoY,
+                scale: 1.15,
+              }}
               className="absolute inset-0 size-full object-cover will-change-transform"
             />
 
@@ -240,7 +330,6 @@ export default function LifestyleVideo() {
             </button>
           </div>
 
-          {/* Floating stat card overlapping the frame */}
           <div className="absolute bottom-0 left-3 right-3 flex items-center gap-3 rounded-xl border border-black/5 bg-white p-3.5 shadow-lg sm:left-4 sm:right-auto sm:w-64 sm:rounded-2xl sm:p-4">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-black text-white sm:size-11">
               <FiUsers size={18} />
@@ -250,6 +339,7 @@ export default function LifestyleVideo() {
               <p className="text-xl font-black text-black sm:text-2xl">
                 <Counter value={10} suffix="K+" />
               </p>
+
               <p className="text-[10px] text-black/50 sm:text-xs">
                 Happy customers
               </p>

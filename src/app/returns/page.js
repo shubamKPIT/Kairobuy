@@ -52,7 +52,7 @@ export default function ReturnsPage() {
         </h2>
 
         <p className="mt-3">
-          Contact Roto Support with your order number, product name, and the
+          Contact Kairobuy Support with your order number, product name, and the
           reason for your return request.
         </p>
       </section>

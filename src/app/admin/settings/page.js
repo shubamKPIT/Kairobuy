@@ -21,7 +21,7 @@ import {
 } from "../../../services/settingsService";
 
 const defaultSettings = {
-  storeName: "Roto",
+  storeName: "Kairobuy",
   shippingCharge: 0,
   taxPercent: 0,
   paymentCOD: true,
@@ -360,7 +360,7 @@ export default function AdminSettingsPage() {
                 name="storeName"
                 value={settings.storeName}
                 onChange={handleChange}
-                placeholder="For example, Roto"
+                placeholder="For example, Kairobuy"
                 maxLength={80}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-11 pr-4 text-sm font-semibold text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-950 focus:bg-white"
               />

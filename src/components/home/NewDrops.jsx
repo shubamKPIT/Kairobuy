@@ -13,6 +13,42 @@ const MIN_ITEMS_PER_SET = 8;
 const SECONDS_PER_CARD = 5;
 const MAX_NEW_DROPS = 12;
 
+// Simple in-memory cache for new drops
+let newDropsCache = null;
+let newDropsPromise = null;
+
+async function fetchNewDropsCached() {
+  if (newDropsCache) {
+    return newDropsCache;
+  }
+
+  if (newDropsPromise) {
+    return newDropsPromise;
+  }
+
+  newDropsPromise = (async () => {
+    try {
+      const data = await fetchProducts(undefined, { category: "new", limit: 12 });
+      const allProducts = data?.products || data || [];
+
+      const manuallyMarkedNewProducts = allProducts.filter(
+        (product) =>
+          String(product.newCategory || "").toLowerCase() === "new",
+      );
+
+      newDropsCache = manuallyMarkedNewProducts.slice(0, MAX_NEW_DROPS);
+      return newDropsCache;
+    } catch (error) {
+      console.error("Error fetching new drops:", error);
+      throw error;
+    } finally {
+      newDropsPromise = null;
+    }
+  })();
+
+  return newDropsPromise;
+}
+
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -41,7 +77,7 @@ function getReviewInfo(product) {
 
 function DropCardSkeleton() {
   return (
-    <div className="h-[340px] animate-pulse rounded-3xl  sm:h-96" />
+    <div className="h-[340px] animate-pulse rounded-3xl sm:h-96" />
   );
 }
 
@@ -59,7 +95,7 @@ function DropCard({ product }) {
   return (
     <Link
       href={`/product/${product._id}`}
-      className="group/card relative block  h-[340px] overflow-hidden  border border-black/5  transition-transform duration-300 hover:-translate-y-2 sm:h-96"
+      className="group/card relative block h-[340px] overflow-hidden border border-black/5 transition-transform duration-300 hover:-translate-y-2 sm:h-96"
     >
       {image && (
         <img
@@ -135,27 +171,10 @@ export default function NewDrops() {
         setIsLoading(true);
         setError("");
 
-        const data = await fetchProducts();
-        const allProducts = data?.products || data || [];
-
-        /*
-          Only products explicitly marked as:
-
-          newCategory: "new"
-
-          appear in the homepage New Drops section.
-        */
-        const manuallyMarkedNewProducts = allProducts.filter(
-          (product) =>
-            String(product.newCategory || "").toLowerCase() === "new",
-        );
-
-        setProducts(
-          manuallyMarkedNewProducts.slice(0, MAX_NEW_DROPS),
-        );
+        const newProducts = await fetchNewDropsCached();
+        setProducts(newProducts);
       } catch (requestError) {
         console.error("Error fetching new drops:", requestError);
-
         setError("Unable to load new drops right now.");
       } finally {
         setIsLoading(false);
@@ -177,7 +196,7 @@ export default function NewDrops() {
 
   return (
     <section className="overflow-hidden py-8 bg-gray-50">
-      <div className="mx-auto  max-w-full  px-6 lg:px-8">
+      <div className="mx-auto max-w-full px-6 lg:px-8">
         <div className="flex max-w-2xl flex-col">
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-700">
             Fresh arrivals
@@ -188,7 +207,7 @@ export default function NewDrops() {
           </h2>
 
           <p className="mt-4 text-base leading-7 text-zinc-600">
-            Explore the latest products selected for the Roto store.
+            Explore the latest products selected for the Kairobuy store.
           </p>
         </div>
       </div>

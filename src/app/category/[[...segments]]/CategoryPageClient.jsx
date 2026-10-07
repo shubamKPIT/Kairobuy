@@ -20,7 +20,6 @@ import {
   getDepartmentBySlug,
 } from "../../../data/departmentData";
 import ProductCard from "../../../components/products/ProductCard";
-import { fetchProducts } from "../../../services/productService";
 import ProductMarquee from "@/components/products/ProductMarquee";
 
 const sortOptions = [
@@ -99,7 +98,6 @@ function TrustStrip() {
 
   return (
     <section className="border-y border-zinc-200 bg-white">
-      {/* 2x2 on mobile, 4 across on desktop; gap-px over a grey bg draws the dividers */}
       <div className={`mx-auto max-w-full ${GUTTER}`}>
         <div className="grid grid-cols-2 gap-px bg-zinc-200 lg:grid-cols-4">
           {trustItems.map((item) => {
@@ -292,7 +290,10 @@ function CategoryMediaSkeleton() {
   );
 }
 
-export default function CategoryPageClient({ initialMediaOverrides }) {
+export default function CategoryPageClient({
+  initialMediaOverrides,
+  initialProducts = [],
+}) {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -363,8 +364,9 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
     ? subcategory.description
     : department?.subtitle || "";
 
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Products come from server; no client fetch
+  const [products, setProducts] = useState(initialProducts);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -375,47 +377,7 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isValidRoute || !department) {
-      setIsLoading(false);
-      return;
-    }
-
-    async function loadProducts() {
-      try {
-        setIsLoading(true);
-        setError("");
-
-        const filters = {};
-
-        if (department.key !== "ALL") {
-          filters.department = department.key;
-        }
-
-        if (subcategory) {
-          filters.subcategory = subcategory.slug;
-        }
-
-        if (department.slug === "new") {
-          filters.category = "new";
-        }
-
-        const response = await fetchProducts(undefined, filters);
-
-        const productList = response?.products || response || [];
-
-        setProducts(Array.isArray(productList) ? productList : []);
-      } catch (requestError) {
-        console.error("Category product loading error:", requestError);
-
-        setError("Unable to load products right now. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadProducts();
-  }, [department?.key, department?.slug, isValidRoute, subcategory?.slug]);
+  // No useEffect that calls fetchProducts
 
   useEffect(() => {
     setSelectedFilter("All");
@@ -441,22 +403,18 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
   }, [isMobileFiltersOpen]);
 
   const productTypeFilters = useMemo(() => {
-    // /category/all → show main store departments
     if (department?.slug === "all") {
       return ["All", "Men", "Women", "Kids", "Home", "Accessories"];
     }
 
-    // /category/new → already loads category=new, no extra filter needed
     if (department?.slug === "new") {
       return ["All"];
     }
 
-    // /category/men/t-shirts → URL already loads only that subcategory
     if (subcategory) {
       return ["All", subcategory.title];
     }
 
-    // /category/men, /women, /kids, /home, /accessories
     return [
       "All",
       ...(department?.subcategories || []).map((item) => item.title),
@@ -590,7 +548,7 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
       <main className="grid min-h-[70vh] place-items-center bg-zinc-50 px-4 sm:px-6">
         <div className="max-w-md text-center">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-amber-700">
-            Roto
+            Kairobuy
           </p>
 
           <h1 className="mt-4 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">
@@ -697,7 +655,7 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
                 ? department.title
                 : department.slug === "new"
                   ? "Fresh arrivals"
-                  : "Roto collection"}
+                  : "Kairobuy collection"}
             </p>
 
             <h1 className="mt-3 break-words text-[clamp(2.25rem,12vw,3rem)] font-black uppercase leading-[0.95] tracking-[-0.05em] sm:mt-4 sm:text-6xl lg:text-8xl">
@@ -879,7 +837,6 @@ export default function CategoryPageClient({ initialMediaOverrides }) {
                 </div>
               </div>
 
-              {/* Only the filter list scrolls; the button below stays visible */}
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
                 <FilterContent
                   filters={productTypeFilters}

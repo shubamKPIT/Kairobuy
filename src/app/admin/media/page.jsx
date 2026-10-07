@@ -53,7 +53,7 @@ const imageTypes = [
   {
     value: "logo",
     label: "Logo",
-    description: "Roto logo or footer/logo branding image.",
+    description: "Kairobuy logo or footer/logo branding image.",
   },
 ];
 
@@ -90,11 +90,11 @@ const departments = [
 
 const logoOptions = [
   {
-    value: "roto-logo",
+    value: "Kairobuy-logo",
     label: "Main Header Logo",
   },
   {
-    value: "roto-logo-white",
+    value: "Kairobuy-logo-white",
     label: "White Header Logo",
   },
   {
@@ -166,7 +166,7 @@ export default function AdminMediaPage() {
   const [mediaType, setMediaType] = useState("subcategory");
   const [departmentSlug, setDepartmentSlug] = useState("men");
   const [subcategorySlug, setSubcategorySlug] = useState("t-shirts");
-  const [logoSlug, setLogoSlug] = useState("roto-logo");
+  const [logoSlug, setLogoSlug] = useState("Kairobuy-logo");
   const [promotionSlug, setPromotionSlug] = useState("under-1000");
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -456,7 +456,7 @@ export default function AdminMediaPage() {
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8">
         <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-amber-700">
-          Roto Admin
+          Kairobuy Admin
         </p>
 
         <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">

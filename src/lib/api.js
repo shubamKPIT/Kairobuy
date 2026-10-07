@@ -22,10 +22,22 @@ export async function apiRequest(endpoint, options = {}) {
     requestHeaders["Content-Type"] = "application/json";
   }
 
+  // Build absolute URL on the server
+  let url = `/api${endpoint}`;
+
+  if (typeof window === "undefined") {
+    const host =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
+
+    url = `${host}/api${endpoint}`;
+  }
+
   let response;
 
   try {
-    response = await fetch(`/api${endpoint}`, {
+    response = await fetch(url, {
       method,
       headers: requestHeaders,
       body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,

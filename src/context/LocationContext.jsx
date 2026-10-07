@@ -13,7 +13,7 @@ const LocationContext = createContext(null);
 
 function getStoredLocation() {
   try {
-    const savedLocation = localStorage.getItem("roto_location");
+    const savedLocation = localStorage.getItem("Kairobuy_location");
     return savedLocation ? JSON.parse(savedLocation) : null;
   } catch {
     return null;
@@ -69,7 +69,7 @@ export function LocationProvider({ children }) {
 
           setLocation(savedLocation);
           localStorage.setItem(
-            "roto_location",
+            "Kairobuy_location",
             JSON.stringify(savedLocation)
           );
         } catch {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 
 export default function InfoPageLayout({
-  eyebrow = "Roto Support",
+  eyebrow = "Kairobuy Support",
   title,
   description,
   updatedAt,

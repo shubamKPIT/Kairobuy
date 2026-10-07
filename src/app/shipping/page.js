@@ -4,7 +4,7 @@ export default function ShippingPage() {
   return (
     <HelpPageLayout
       title="Shipping Information"
-      description="Learn how Roto processes, dispatches, and delivers your orders."
+      description="Learn how Kairobuy processes, dispatches, and delivers your orders."
     >
       <section>
         <h2 className="text-xl font-black text-zinc-950">

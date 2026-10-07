@@ -6,7 +6,7 @@ import StoreSettings from "../../../models/StoreSettings";
 export const runtime = "nodejs";
 
 const defaultSettings = {
-  storeName: "Roto",
+  storeName: "Kairobuy",
   shippingCharge: 0,
   taxPercent: 0,
   paymentCOD: true,

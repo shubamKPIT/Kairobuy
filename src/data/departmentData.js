@@ -3,7 +3,7 @@ export const departmentData = {
     key: "ALL",
     slug: "all",
     title: "All Products",
-    subtitle: "Explore the complete Roto collection.",
+    subtitle: "Explore the complete Kairobuy collection.",
     // banner: "/images/Bagcover.jpg",
     productType: "all",
     description:
@@ -15,11 +15,11 @@ export const departmentData = {
     key: "ALL",
     slug: "new",
     title: "New Drops",
-    subtitle: "Explore the latest products selected for the Roto store.",
+    subtitle: "Explore the latest products selected for the Kairobuy store.",
     // banner: "/images/newcover.jpg",
     productType: "new",
     description:
-      "Fresh arrivals, recently added products, and the latest Roto drops.",
+      "Fresh arrivals, recently added products, and the latest Kairobuy drops.",
     subcategories: [],
   },
 

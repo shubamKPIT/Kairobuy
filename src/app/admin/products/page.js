@@ -206,7 +206,7 @@ function EditProductModal({
               onChange={onChange}
               className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
             >
-              <option value="INVENTORY">Roto Inventory</option>
+              <option value="INVENTORY">Kairobuy Inventory</option>
               <option value="VENDOR">Vendor Product</option>
               <option value="AMAZON">Amazon Affiliate Product</option>
             </select>
@@ -292,7 +292,7 @@ function EditProductModal({
               </p>
 
               <p className="mt-1 text-xs leading-5 text-orange-800">
-                Customers cannot add this product to the Roto cart. They will be
+                Customers cannot add this product to the Kairobuy cart. They will be
                 sent to Amazon through the affiliate link below.
               </p>
             </div>
@@ -339,7 +339,7 @@ function EditProductModal({
                 name="brand"
                 value={product.brand || ""}
                 onChange={onChange}
-                placeholder="Example: Roto, Puma, Noise, Adidas"
+                placeholder="Example: Kairobuy, Puma, Noise, Adidas"
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
               />
             </label>
@@ -654,7 +654,7 @@ function EditProductModal({
                 onChange={onChange}
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
               >
-                <option value="CHECKOUT">Roto checkout</option>
+                <option value="CHECKOUT">Kairobuy checkout</option>
                 <option value="EXTERNAL_LINK">Open external seller link</option>
               </select>
             </label>

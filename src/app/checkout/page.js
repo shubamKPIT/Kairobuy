@@ -267,8 +267,8 @@ export default function CheckoutPage() {
       key: razorpayKey,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency || "INR",
-      name: "Roto",
-      description: "Roto order payment",
+      name: "Kairobuy",
+      description: "Kairobuy order payment",
       order_id: razorpayOrder.id,
 
       prefill: {

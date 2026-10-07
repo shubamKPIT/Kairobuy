@@ -1,8 +1,8 @@
 import AdminShell from "../../components/admin/AdminShell";
 
 export const metadata = {
-  title: "Roto Admin",
-  description: "Roto administration panel",
+  title: "Kairobuy Admin",
+  description: "Kairobuy administration panel",
 };
 
 export default function AdminLayout({ children }) {

@@ -34,7 +34,7 @@ export default function ContactPage() {
             Email support
           </h2>
           <p className="mt-2 text-sm text-zinc-600">
-            support@roto.example
+            support@kairobuy.example
           </p>
         </div>
 

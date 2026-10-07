@@ -3,18 +3,18 @@ import InfoPageLayout from "@/components/site/InfoPageLayout";
 export default function TermsPage() {
   return (
     <InfoPageLayout
-      eyebrow="Roto Legal"
+      eyebrow="Kairobuy Legal"
       title="Terms of Service"
-      description="Rules and conditions for using Roto and purchasing products through the platform."
+      description="Rules and conditions for using Kairobuy and purchasing products through the platform."
       updatedAt="October 5, 2026"
     >
       <section>
         <h2 className="text-xl font-black text-zinc-950">
-          Using Roto
+          Using Kairobuy
         </h2>
 
         <p className="mt-3">
-          By accessing or using Roto, you agree to use the platform lawfully
+          By accessing or using Kairobuy, you agree to use the platform lawfully
           and provide accurate information when placing orders or creating an
           account.
         </p>
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
         <p className="mt-3">
           Some products may link to external seller or affiliate websites.
-          Purchases completed outside Roto are governed by that seller’s own
+          Purchases completed outside Kairobuy are governed by that seller’s own
           pricing, shipping, payment, and return policies.
         </p>
       </section>
@@ -50,7 +50,7 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-3">
-          Roto may update these terms when required. Continued use after an
+          Kairobuy may update these terms when required. Continued use after an
           update means you accept the revised version.
         </p>
       </section>

@@ -17,7 +17,7 @@ const reviewSchema = new mongoose.Schema(
 
     userName: {
       type: String,
-      default: "Roto customer",
+      default: "Kairobuy customer",
       trim: true,
     },
 

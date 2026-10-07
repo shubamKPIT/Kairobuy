@@ -12,6 +12,7 @@ const categories = [
     imageKey: "home/categories/men",
     fallbackImage: "/images/Bagcover.jpg",
     collection: "Shop Men",
+    department: "MEN",
   },
   {
     title: "Women",
@@ -20,6 +21,7 @@ const categories = [
     imageKey: "home/categories/women",
     fallbackImage: "/images/Accessorycover.jpg",
     collection: "Shop Women",
+    department: "WOMEN",
   },
   {
     title: "Kids",
@@ -28,6 +30,7 @@ const categories = [
     imageKey: "home/categories/kids",
     fallbackImage: "/images/newcover.jpg",
     collection: "Shop Kids",
+    department: "KIDS",
   },
   {
     title: "Home",
@@ -36,6 +39,7 @@ const categories = [
     imageKey: "home/categories/home",
     fallbackImage: "/images/Electronics.jpg",
     collection: "Shop Home",
+    department: "HOME",
   },
   {
     title: "Accessories",
@@ -44,12 +48,23 @@ const categories = [
     imageKey: "home/categories/accessories",
     fallbackImage: "/images/Accessorycover.jpg",
     collection: "Shop Accessories",
+    department: "ACCESSORIES",
   },
 ];
 
+function formatPrice(price) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(price || 0));
+}
+
 export default function CategoryShowcase() {
   const [media, setMedia] = useState({});
+  const [deptStats, setDeptStats] = useState({});
 
+  // Load category images
   useEffect(() => {
     let isActive = true;
 
@@ -84,6 +99,64 @@ export default function CategoryShowcase() {
     };
   }, []);
 
+  // Load per-department stats
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadDepartmentStats() {
+      try {
+        const res = await fetch("/api/products?limit=300&mode=stats", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const allProducts = Array.isArray(data?.products)
+          ? data.products
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        const activeProducts = allProducts.filter(
+          (p) => p.isActive !== false && Number(p.price || 0) > 0,
+        );
+
+        const stats = {};
+
+        categories.forEach((cat) => {
+          const deptProducts = activeProducts.filter(
+            (p) =>
+              String(p.department || "").toUpperCase() === cat.department,
+          );
+
+          if (deptProducts.length > 0) {
+            const minPrice = Math.min(
+              ...deptProducts.map((p) => Number(p.price || 0)),
+            );
+
+            stats[cat.department] = {
+              count: deptProducts.length,
+              fromPrice: minPrice,
+            };
+          }
+        });
+
+        if (isActive) {
+          setDeptStats(stats);
+        }
+      } catch (error) {
+        console.error("Department stats error:", error);
+      }
+    }
+
+    loadDepartmentStats();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   return (
     <section className="bg-gray-50 py-8 sm:py-10">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
@@ -107,6 +180,10 @@ export default function CategoryShowcase() {
           {categories.map((category, index) => {
             const imageUrl = media[category.imageKey] || category.fallbackImage;
             const isLast = index === categories.length - 1;
+
+            const stats = deptStats[category.department];
+            const fromPrice = stats?.fromPrice;
+            const count = stats?.count ?? 0;
 
             return (
               <Link
@@ -146,7 +223,14 @@ export default function CategoryShowcase() {
                   </p>
 
                   <div className="mt-3 flex items-center gap-1.5 text-xs font-bold sm:mt-5 sm:gap-2 sm:text-sm">
-                    Explore collection
+                    {fromPrice ? (
+                      <>
+                        From {formatPrice(fromPrice)}{" "}
+                        <span className="text-white/70">({count} items)</span>
+                      </>
+                    ) : (
+                      "Explore collection"
+                    )}
                     <FiArrowUpRight
                       className="size-3.5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 sm:size-[17px]"
                     />

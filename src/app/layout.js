@@ -3,7 +3,7 @@ import AppProviders from "../context/AppProviders";
 import StorefrontShell from "../components/layout/StorefrontShell";
 
 export const metadata = {
-  title: "Roto",
+  title: "Kairobuy",
   description: "A modern shopping experience.",
 };
 

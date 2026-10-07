@@ -17,14 +17,14 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
-import { useLocation } from "../../context/LocationContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useLocation } from "../../context/LocationContext";
 import { departmentData } from "../../data/departmentData";
 import { searchProducts } from "../../services/productService";
 import CartDrawer from "../cart/CartDrawer";
 
-const LOGO_DEFAULT = "/images/roto_logo_transparent.png";
-const LOGO_WHITE = "/images/Roto-transparent-white-logo.png";
+const LOGO_DEFAULT = "/images/Kairobuy_logo_transparent.png";
+const LOGO_WHITE = "/images/Kairobuy-transparent-white-logo.png";
 
 const navLinks = [
   { name: "Men", href: "/category/men", department: "men" },
@@ -56,6 +56,9 @@ function getSearchProductMeta(product) {
   return formatPrice(product.price);
 }
 
+// Simple in-memory cache for search results
+const searchCache = new Map();
+
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
@@ -82,11 +85,10 @@ export default function Header() {
   const searchRef = useRef(null);
 
   const hasHero = pathname === "/" || pathname.startsWith("/category/");
-
   const isTransparent = hasHero && !isScrolled && !isMobileMenuOpen;
 
-  const defaultLogoUrl = logoMedia["logos/roto-logo"] || LOGO_DEFAULT;
-  const whiteLogoUrl = logoMedia["logos/roto-logo-white"] || LOGO_WHITE;
+  const defaultLogoUrl = logoMedia["logos/Kairobuy-logo"] || LOGO_DEFAULT;
+  const whiteLogoUrl = logoMedia["logos/Kairobuy-logo-white"] || LOGO_WHITE;
 
   const closeAllMenus = () => {
     setIsMobileMenuOpen(false);
@@ -108,7 +110,7 @@ export default function Header() {
     async function loadLogoMedia() {
       try {
         const response = await fetch("/api/media", {
-          cache: "no-store",
+          cache: "force-cache",
         });
 
         if (!response.ok) {
@@ -178,6 +180,14 @@ export default function Header() {
       return;
     }
 
+    const cacheKey = trimmedSearchTerm.toLowerCase();
+
+    if (searchCache.has(cacheKey)) {
+      setSearchResults(searchCache.get(cacheKey));
+      setIsSearchLoading(false);
+      return;
+    }
+
     const timeout = setTimeout(async () => {
       try {
         setIsSearchLoading(true);
@@ -185,6 +195,7 @@ export default function Header() {
         const data = await searchProducts(trimmedSearchTerm);
         const products = data?.products || data || [];
 
+        searchCache.set(cacheKey, products);
         setSearchResults(products);
       } catch (requestError) {
         console.error("Product search error:", requestError);
@@ -280,12 +291,12 @@ export default function Header() {
             <Link
               href="/"
               onClick={closeAllMenus}
-              aria-label="ROTO home"
+              aria-label="Kairobuy home"
               className="relative block shrink-0"
             >
               <img
                 src={defaultLogoUrl}
-                alt="ROTO"
+                alt="Kairobuy"
                 className={`h-14 object-contain transition-opacity duration-300 sm:h-16 md:h-20 ${
                   isTransparent ? "opacity-0" : "opacity-100"
                 }`}
@@ -300,12 +311,12 @@ export default function Header() {
                 }`}
               />
             </Link>
-
+            <div className="pt-1">
             <button
               type="button"
               title={error || "Click to refresh your location"}
               onClick={detectLocation}
-              className={`hidden max-w-40 items-center gap-2 truncate rounded-full px-3 py-2 text-xs font-bold transition xl:flex ${
+              className={`hidden max-w-40  items-center gap-2 truncate rounded-full px-3 py-2 text-xs font-bold transition xl:flex ${
                 isTransparent
                   ? "bg-white/15 text-white/90 backdrop-blur-sm hover:bg-white/25 hover:text-white"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-950"
@@ -314,6 +325,7 @@ export default function Header() {
               <FiMapPin size={15} className="shrink-0" />
               <span className="truncate">{getLocationLabel()}</span>
             </button>
+            </div>
           </div>
 
           <nav className="hidden items-center gap-5 lg:flex">
@@ -329,7 +341,7 @@ export default function Header() {
                     key={link.name}
                     href={link.href}
                     onClick={closeAllMenus}
-                    className={`relative text-xs font-extrabold uppercase tracking-[0.08em] transition ${navLinkClass}`}
+                    className={`relative text-sm font-extrabold pt-1 uppercase tracking-[0.08em] transition ${navLinkClass}`}
                   >
                     {link.name}
                   </Link>
@@ -347,7 +359,7 @@ export default function Header() {
                     <Link
                       href={link.href}
                       onClick={closeAllMenus}
-                      className={`text-xs font-extrabold uppercase tracking-[0.08em] transition ${navLinkClass}`}
+                      className={`text-sm font-extrabold pt-1 uppercase tracking-[0.08em] transition ${navLinkClass}`}
                     >
                       {link.name}
                     </Link>
@@ -358,10 +370,10 @@ export default function Header() {
                       aria-expanded={openDesktopDepartment === link.department}
                       onClick={() =>
                         setOpenDesktopDepartment((current) =>
-                          current === link.department ? "" : link.department,
+                          current === link.department ? "" : link.department
                         )
                       }
-                      className={`ml-1 grid size-5 place-items-center rounded-full transition ${navLinkClass}`}
+                      className={`ml-1 grid size-5  place-items-center rounded-full transition ${navLinkClass}`}
                     >
                       <FiChevronDown
                         size={13}
@@ -384,7 +396,7 @@ export default function Header() {
                         >
                           <div>
                             <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-300">
-                              ROTO collection
+                              Kairobuy collection
                             </p>
                           </div>
 
@@ -435,7 +447,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
+          <div className="flex shrink-0 items-center pt-1 gap-0.5 sm:gap-2">
             <Link
               href="/wishlist"
               aria-label="Open wishlist"
@@ -463,8 +475,6 @@ export default function Header() {
                 <FiSearch size={19} />
               </button>
 
-              {/* Mobile: pinned to the screen edges below the header.
-                  sm and up: dropdown anchored under the search icon. */}
               {isSearchOpen && (
                 <div className="fixed inset-x-3 top-[76px] z-50 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[360px]">
                   <div className="border-b border-zinc-200 p-3">
@@ -696,7 +706,7 @@ export default function Header() {
                         aria-label={`Toggle ${link.name} categories`}
                         onClick={() =>
                           setOpenMobileDepartment((current) =>
-                            current === link.department ? "" : link.department,
+                            current === link.department ? "" : link.department
                           )
                         }
                         className="grid size-10 place-items-center rounded-full text-zinc-700 transition hover:bg-zinc-100"

@@ -7,7 +7,7 @@ export default function HelpPageLayout({
 }) {
   return (
     <InfoPageLayout
-      eyebrow="Roto Help Centre"
+      eyebrow="Kairobuy Help Centre"
       title={title}
       description={description}
     >

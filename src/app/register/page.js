@@ -114,7 +114,7 @@ export default function RegisterPage() {
   return (
     <AuthLayout
       title="Create account."
-      subtitle="Create your Roto account to save products, track orders, and checkout faster."
+      subtitle="Create your Kairobuy account to save products, track orders, and checkout faster."
       footerText="Already have an account?"
       footerLinkText="Login"
       footerLinkHref="/login"

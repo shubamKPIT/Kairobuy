@@ -3,9 +3,9 @@ import InfoPageLayout from "@/components/site/InfoPageLayout";
 export default function PrivacyPolicyPage() {
   return (
     <InfoPageLayout
-      eyebrow="Roto Legal"
+      eyebrow="Kairobuy Legal"
       title="Privacy Policy"
-      description="How Roto collects, uses, stores, and protects customer information."
+      description="How Kairobuy collects, uses, stores, and protects customer information."
       updatedAt="October 5, 2026"
     >
       <section>
@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
         <p className="mt-3">
           We may collect information you provide when creating an account,
           placing an order, contacting support, subscribing to updates, or
-          using Roto services.
+          using Kairobuy services.
         </p>
       </section>
 
@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
         </h2>
 
         <p className="mt-3">
-          For privacy questions, contact Roto Support using the Contact Us page.
+          For privacy questions, contact Kairobuy Support using the Contact Us page.
         </p>
       </section>
     </InfoPageLayout>

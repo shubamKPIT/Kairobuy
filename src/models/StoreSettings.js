@@ -4,7 +4,7 @@ const storeSettingsSchema = new mongoose.Schema(
   {
     storeName: {
       type: String,
-      default: "Roto",
+      default: "Kairobuy",
       trim: true,
     },
 

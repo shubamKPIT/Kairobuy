@@ -635,7 +635,7 @@ export default function AddProductPage() {
       <div className="mx-auto max-w-4xl">
         <header className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-amber-700">
-            Roto Admin
+            Kairobuy Admin
           </p>
 
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">
@@ -677,7 +677,7 @@ export default function AddProductPage() {
                 onChange={handleSourceChange}
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"
               >
-                <option value="INVENTORY">Roto inventory</option>
+                <option value="INVENTORY">Kairobuy inventory</option>
                 <option value="VENDOR">Vendor product</option>
                 <option value="AMAZON">Amazon affiliate product</option>
               </select>
@@ -686,7 +686,7 @@ export default function AddProductPage() {
             {isAmazon && (
               <div className="mt-4 rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm font-semibold text-orange-950">
                 This product opens Amazon through your affiliate link and cannot
-                be added to the Roto cart.
+                be added to the Kairobuy cart.
               </div>
             )}
           </section>
@@ -816,7 +816,7 @@ export default function AddProductPage() {
                   type="text"
                   value={form.brand}
                   onChange={(event) => updateField("brand", event.target.value)}
-                  placeholder="Example: Roto"
+                  placeholder="Example: Kairobuy"
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"
                 />
               </div>
@@ -1131,7 +1131,7 @@ export default function AddProductPage() {
                   onChange={handlePurchaseModeChange}
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 outline-none"
                 >
-                  <option value="CHECKOUT">Buy through Roto checkout</option>
+                  <option value="CHECKOUT">Buy through Kairobuy checkout</option>
                   <option value="EXTERNAL_LINK">
                     Open an external seller link
                   </option>

@@ -8,6 +8,10 @@ function escapeRegex(value = "") {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function stringValue(value = "") {
+  return typeof value === "string" ? value : String(value ?? "");
+}
+
 export async function GET(request) {
   try {
     await connectDatabase();
@@ -19,6 +23,18 @@ export async function GET(request) {
     const department = searchParams.get("department")?.trim();
     const subcategory = searchParams.get("subcategory")?.trim();
     const source = searchParams.get("source")?.trim();
+
+    const requestedLimit = Number.parseInt(
+      searchParams.get("limit") || "0",
+      10,
+    );
+
+    const limit =
+      Number.isFinite(requestedLimit) && requestedLimit > 0
+        ? Math.min(requestedLimit, 100)
+        : 0;
+
+    const mode = searchParams.get("mode")?.trim();
 
     /*
       Customers only receive products that are active.
@@ -69,21 +85,10 @@ export async function GET(request) {
       ];
     }
 
-    /*
-      Supports older category pages such as:
-
-      /api/products?category=bags
-    */
     if (category && category.toLowerCase() !== "all") {
       filter.newCategory = category.toLowerCase();
     }
 
-    /*
-      New department routes:
-
-      /api/products?department=MEN
-      /api/products?department=MEN&subcategory=t-shirts
-    */
     const validDepartments = [
       "ALL",
       "MEN",
@@ -111,16 +116,33 @@ export async function GET(request) {
       filter.source = source;
     }
 
-    const products = await Product.find(filter)
+    // Build query once
+    let query = Product.find(filter);
+
+    // Stats mode: only send minimal fields
+    if (mode === "stats") {
+      query = query.select("department price");
+    }
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const products = await query
       .sort({
         isFeatured: -1,
         createdAt: -1,
       })
       .lean();
 
-    return NextResponse.json(products, {
-      status: 200,
-    });
+    return NextResponse.json(
+      {
+        products,
+      },
+      {
+        status: 200,
+      },
+    );
   } catch (error) {
     console.error("GET PRODUCTS ERROR:", error);
 
@@ -133,39 +155,4 @@ export async function GET(request) {
       },
     );
   }
-}
-function cleanDetailSections(value) {
-  if (!Array.isArray(value)) return [];
-
-  return value
-    .map((section) => ({
-      title: stringValue(section?.title).slice(0, 80),
-      content:
-        typeof section?.content === "string"
-          ? section.content
-              .split("\n")
-              .map((line) => line.trim())
-              .filter(Boolean)
-              .slice(0, 30)
-              .join("\n")
-          : "",
-    }))
-    .filter((section) => section.title && section.content)
-    .slice(0, 12);
-}
-
-function cleanSpecifications(value) {
-  if (!Array.isArray(value)) return [];
-
-  return Array.from(
-    new Map(
-      value
-        .map((row) => ({
-          label: stringValue(row?.label).slice(0, 80),
-          value: stringValue(row?.value).slice(0, 120),
-        }))
-        .filter((row) => row.label && row.value)
-        .map((row) => [row.label.toLowerCase(), row]),
-    ).values(),
-  ).slice(0, 40);
 }

@@ -46,7 +46,7 @@ export default function TrackOrderPage() {
           <input
             value={orderNumber}
             onChange={(event) => setOrderNumber(event.target.value)}
-            placeholder="Example: ROTO-123456"
+            placeholder="Example: Kairobuy-123456"
             className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-100"
           />
 
@@ -73,7 +73,7 @@ export default function TrackOrderPage() {
 
         <p className="mt-3">
           Shipment tracking becomes available after your order is dispatched.
-          Check your email or contact Roto Support if you need help locating an
+          Check your email or contact Kairobuy Support if you need help locating an
           order.
         </p>
       </section>

@@ -15,6 +15,9 @@ function createSearchParams(filters = {}) {
   return searchParams;
 }
 
+// Simple in-memory cache for fetchProducts
+const productsCache = new Map();
+
 /*
   Compatible with your existing calls:
 
@@ -28,14 +31,23 @@ function createSearchParams(filters = {}) {
     subcategory: "t-shirts",
   })
 */
-export function fetchProducts(token, filters = {}) {
+export async function fetchProducts(token, filters = {}) {
   const searchParams = createSearchParams(filters);
-
   const query = searchParams.toString();
 
-  return apiRequest(`/products${query ? `?${query}` : ""}`, {
+  const cacheKey = `products:${query || "all"}`;
+
+  if (productsCache.has(cacheKey)) {
+    return productsCache.get(cacheKey);
+  }
+
+  const result = await apiRequest(`/products${query ? `?${query}` : ""}`, {
     token,
   });
+
+  productsCache.set(cacheKey, result);
+
+  return result;
 }
 
 export function searchProducts(query, token) {

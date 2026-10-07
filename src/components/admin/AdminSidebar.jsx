@@ -103,12 +103,12 @@ export default function AdminSidebar({ isOpen, onClose }) {
             onClick={onClose}
             className="flex items-center gap-3"
           >
-            <div className="grid size-10 place-items-center rounded-xl bg-white text-sm font-black tracking-[0.16em] text-zinc-950">
-              R
+            <div className="grid size-10 place-items-center rounded-xl bg-white text-lg font-black tracking-[0.16em] text-zinc-950">
+              K
             </div>
 
             <div>
-              <p className="text-sm font-black tracking-[0.16em]">ROTO</p>
+              <p className="text-sm font-black tracking-[0.16em]">Kairobuy</p>
 
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                 Admin Panel

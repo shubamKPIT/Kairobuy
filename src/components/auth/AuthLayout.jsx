@@ -22,13 +22,13 @@ export default function AuthLayout({
         href="/"
         className="absolute left-6 top-6 text-xl font-black tracking-[0.22em] text-white sm:left-8 sm:top-8"
       >
-        ROTO
+        Kairobuy
       </Link>
 
       {/* Auth card */}
       <section className="relative z-10 w-full max-w-md rounded-3xl border border-white/15 bg-white/[0.08] p-6 shadow-2xl backdrop-blur-xl sm:p-8">
         <p className="text-center text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
-          Welcome to Roto
+          Welcome to Kairobuy
         </p>
 
         <h1 className="mt-4 text-center text-4xl font-black tracking-tight text-white">

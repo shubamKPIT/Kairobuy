@@ -86,7 +86,7 @@ export default function Footer() {
       <div className="px-5 py-8 lg:hidden">
         <div className="text-center">
           <h2 className="text-3xl font-bold uppercase tracking-widest">
-            Roto
+            Kairobuy
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-gray-400">
@@ -190,7 +190,7 @@ export default function Footer() {
         </div>
 
         <p className="mt-5 text-center text-sm text-gray-500">
-          © {year} Roto. All rights reserved.
+          © {year} Kairobuy. All rights reserved.
         </p>
       </div>
 
@@ -200,7 +200,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col">
             <h2 className="mb-4 text-2xl font-bold uppercase">
-              Roto
+              Kairobuy
             </h2>
 
             <p className="max-w-sm text-sm leading-relaxed text-gray-400">
@@ -284,7 +284,7 @@ export default function Footer() {
         {/* Bottom footer */}
         <div className="flex flex-col items-center justify-between gap-3 pt-6 text-sm text-gray-400 md:flex-row">
           <p className="text-center md:text-left">
-            © {year} Roto. All rights reserved.
+            © {year} Kairobuy. All rights reserved.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6">

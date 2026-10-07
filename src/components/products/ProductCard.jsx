@@ -27,8 +27,8 @@ export default function ProductCard({ product }) {
   const [activeImage, setActiveImage] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  const name = product.name || product.title || "Roto product";
-  const brand = product.brand || product.category || "Roto";
+  const name = product.name || product.title || "Kairobuy product";
+  const brand = product.brand || product.category || "Kairobuy";
 
   const isAmazon = product.source === "AMAZON";
   const isExternal = product.purchaseMode === "EXTERNAL_LINK" || isAmazon;

@@ -12,6 +12,7 @@ const budgetCards = [
     imageKey: "promos/home/under-1000",
     gradient: "from-amber-500 via-orange-500 to-rose-500",
     accent: "text-amber-200",
+    maxPrice: 1000,
   },
   {
     title: "₹1,000 – ₹3,000",
@@ -20,6 +21,8 @@ const budgetCards = [
     imageKey: "promos/home/1000-3000",
     gradient: "from-emerald-600 via-teal-600 to-cyan-700",
     accent: "text-emerald-200",
+    minPrice: 1000,
+    maxPrice: 3000,
   },
   {
     title: "₹3,000 – ₹5,000",
@@ -28,6 +31,8 @@ const budgetCards = [
     imageKey: "promos/home/3000-5000",
     gradient: "from-sky-600 via-blue-700 to-indigo-800",
     accent: "text-sky-200",
+    minPrice: 3000,
+    maxPrice: 5000,
   },
   {
     title: "₹5,000 – ₹10,000",
@@ -36,6 +41,8 @@ const budgetCards = [
     imageKey: "promos/home/5000-10000",
     gradient: "from-violet-600 via-purple-700 to-fuchsia-800",
     accent: "text-violet-200",
+    minPrice: 5000,
+    maxPrice: 10000,
   },
   {
     title: "Above ₹10,000",
@@ -44,11 +51,21 @@ const budgetCards = [
     imageKey: "promos/home/above-10000",
     gradient: "from-zinc-700 via-zinc-900 to-black",
     accent: "text-zinc-300",
+    minPrice: 10000,
   },
 ];
 
+function formatPrice(price) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(price || 0));
+}
+
 export default function ShopByBudget() {
   const [media, setMedia] = useState({});
+  const [budgetStats, setBudgetStats] = useState({});
 
   useEffect(() => {
     let isActive = true;
@@ -84,6 +101,78 @@ export default function ShopByBudget() {
     };
   }, []);
 
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadBudgetStats() {
+      try {
+        const res = await fetch("/api/products?limit=200&mode=stats", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const allProducts = Array.isArray(data?.products)
+          ? data.products
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        const activeProducts = allProducts.filter(
+          (p) => p.isActive !== false && Number(p.price || 0) > 0,
+        );
+
+        const stats = {};
+
+        budgetCards.forEach((card) => {
+          const filtered = activeProducts.filter((p) => {
+            const price = Number(p.price || 0);
+
+            if (card.maxPrice && !card.minPrice) {
+              // Under X
+              return price <= card.maxPrice;
+            }
+
+            if (card.minPrice && !card.maxPrice) {
+              // Above X
+              return price >= card.minPrice;
+            }
+
+            if (card.minPrice && card.maxPrice) {
+              return price >= card.minPrice && price <= card.maxPrice;
+            }
+
+            return false;
+          });
+
+          if (filtered.length > 0) {
+            const minPriceInBucket = Math.min(
+              ...filtered.map((p) => Number(p.price || 0)),
+            );
+
+            stats[card.imageKey] = {
+              count: filtered.length,
+              fromPrice: minPriceInBucket,
+            };
+          }
+        });
+
+        if (isActive) {
+          setBudgetStats(stats);
+        }
+      } catch (error) {
+        console.error("Budget stats error:", error);
+      }
+    }
+
+    loadBudgetStats();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   return (
     <section className="bg-gray-50 py-8 sm:py-10">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
@@ -107,6 +196,10 @@ export default function ShopByBudget() {
           {budgetCards.map((card, index) => {
             const imageUrl = media[card.imageKey];
             const isLast = index === budgetCards.length - 1;
+
+            const stats = budgetStats[card.imageKey];
+            const fromPrice = stats?.fromPrice;
+            const count = stats?.count ?? 0;
 
             return (
               <Link
@@ -145,7 +238,7 @@ export default function ShopByBudget() {
                       imageUrl ? "text-white/75" : card.accent
                     }`}
                   >
-                    Roto picks
+                    Kairobuy picks
                   </p>
 
                   <h3 className="mt-1 text-lg font-black tracking-tight sm:mt-2 sm:text-2xl">
@@ -157,7 +250,14 @@ export default function ShopByBudget() {
                   </p>
 
                   <div className="mt-3 flex items-center gap-1.5 text-xs font-bold sm:mt-5 sm:gap-2 sm:text-sm">
-                    Shop collection
+                    {fromPrice ? (
+                      <>
+                        From {formatPrice(fromPrice)}{" "}
+                        <span className="text-white/70">({count} items)</span>
+                      </>
+                    ) : (
+                      "Shop collection"
+                    )}
                     <FiArrowUpRight className="size-3.5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 sm:size-[17px]" />
                   </div>
                 </div>

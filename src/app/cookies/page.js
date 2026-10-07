@@ -3,9 +3,9 @@ import InfoPageLayout from "@/components/site/InfoPageLayout";
 export default function CookiesPage() {
   return (
     <InfoPageLayout
-      eyebrow="Roto Legal"
+      eyebrow="Kairobuy Legal"
       title="Cookie Policy"
-      description="How Roto uses cookies and similar technologies."
+      description="How Kairobuy uses cookies and similar technologies."
       updatedAt="October 5, 2026"
     >
       <section>
@@ -25,7 +25,7 @@ export default function CookiesPage() {
         </h2>
 
         <p className="mt-3">
-          Roto may use cookies for essential functionality, shopping-cart
+          Kairobuy may use cookies for essential functionality, shopping-cart
           behaviour, login sessions, preferences, analytics, and security.
         </p>
       </section>

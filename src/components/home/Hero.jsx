@@ -25,27 +25,27 @@ const slides = [
   {
     id: "mini-kadet",
     image:
-      "https://chromeindustries.com/cdn/shop/files/YearMonthDay_HP-MiniKadetReviews-Desktop_1.jpg?v=1777045669&width=2000",
+      "https://images.pexels.com/photos/31251094/pexels-photo-31251094.jpeg",
     mobileImage:
       "https://images.pexels.com/photos/37625744/pexels-photo-37625744.jpeg",
-    eyebrow: "Top rated for a reason",
-    title: "Simple and comfortable.",
+    eyebrow: "Creams & accessories",
+    title: "Finishing touches.",
     description:
-      "The mini sling carries your essentials without the bulk, and sits close to the body all day.",
-    buttonText: "Get the mini",
+      "Nourishing creams and refined accessories, chosen to complete your look. Small details that make every day feel considered.",
+    buttonText: "Explore women",
     route: "/category/women",
     align: "left",
     cards: [
       {
-        title: "50+ products",
-        sub: "Shop women",
+        title: "Creams & care",
+        sub: "Skin essentials",
         route: "/category/women",
         image:
           "https://images.pexels.com/photos/37625744/pexels-photo-37625744.jpeg",
       },
       {
-        title: "New arrivals",
-        sub: "Just dropped",
+        title: "Accessories",
+        sub: "Complete the look",
         route: "/category/women",
         image:
           "https://chromeindustries.com/cdn/shop/files/YearMonthDay_HP-MiniKadetReviews-Desktop_1.jpg?v=1777045669&width=2000",
@@ -55,27 +55,27 @@ const slides = [
   {
     id: "everyday-organizers",
     image:
-      "https://chromeindustries.com/cdn/shop/files/041526_Rim-homepage-Desktop-V2_1.jpg?v=1776289664&width=2000",
+      "https://images.pexels.com/photos/5869611/pexels-photo-5869611.jpeg",
     mobileImage:
       "https://images.pexels.com/photos/21390399/pexels-photo-21390399.jpeg",
-    eyebrow: "Everyday organizers",
-    title: "Wear it. Stash it.",
+    eyebrow: "The men's store",
+    title: "Shop with intent.",
     description:
-      "Pockets, straps and pouches that keep everything in reach and out of your way.",
-    buttonText: "Find your setup",
+      "Everything you need, curated in one place. Browse the essentials, find what fits, and check out in minutes.",
+    buttonText: "Start shopping",
     route: "/category/men",
     align: "center",
     cards: [
       {
-        title: "50+ products",
-        sub: "Shop men",
+        title: "Shop all",
+        sub: "Browse men",
         route: "/category/men",
         image:
           "https://images.pexels.com/photos/21390399/pexels-photo-21390399.jpeg",
       },
       {
         title: "Best sellers",
-        sub: "Most loved",
+        sub: "Customer favorites",
         route: "/category/men",
         image:
           "https://chromeindustries.com/cdn/shop/files/041526_Rim-homepage-Desktop-V2_1.jpg?v=1776289664&width=2000",

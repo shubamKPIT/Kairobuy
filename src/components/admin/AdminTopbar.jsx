@@ -7,7 +7,7 @@ export default function AdminTopbar({ onMenuOpen }) {
     <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-zinc-200 bg-white/90 px-4 backdrop-blur-md lg:hidden">
       <div>
         <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-amber-700">
-          Roto
+          Kairobuy
         </p>
 
         <h1 className="text-lg font-black tracking-tight text-zinc-950">
