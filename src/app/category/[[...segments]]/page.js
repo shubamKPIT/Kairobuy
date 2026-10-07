@@ -48,16 +48,17 @@ export default async function CategoryPage({ params, searchParams }) {
     filters.category = "new";
   }
 
-  let initialProducts = [];
 
-  try {
-    const response = await fetchProducts(undefined, filters);
-    const productList = response?.products || response || [];
-    initialProducts = Array.isArray(productList) ? productList : [];
-  } catch (error) {
-    console.error("Category page product fetch error:", error);
-    initialProducts = [];
-  }
+let initialProducts = [];
+
+try {
+  const response = await fetchProducts(undefined, filters);
+  const productList = response?.products || response || [];
+  initialProducts = Array.isArray(productList) ? productList : [];
+} catch (error) {
+  console.error("Category page product fetch error:", error);
+  initialProducts = [];
+}
 
   return (
     <CategoryPageClient

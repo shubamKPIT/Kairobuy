@@ -366,6 +366,10 @@ export default function CategoryPageClient({
 
   // Products come from server; no client fetch
   const [products, setProducts] = useState(initialProducts);
+  console.log("CategoryPageClient initialProducts:", initialProducts);
+  console.log("CategoryPageClient products state:", products);
+  console.log("CategoryPageClient department:", department);
+  console.log("CategoryPageClient finalProducts:", finalProducts);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 

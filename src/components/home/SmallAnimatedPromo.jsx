@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function SmallAnimatedPromo({
   href = "/category/all",
-  imageUrl = "/images/promo.gif",
+  imageUrl = "/images/Promo.gif",
   title = "Shop the latest offer",
 }) {
   return (
