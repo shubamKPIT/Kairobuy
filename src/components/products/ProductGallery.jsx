@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FiHeart } from "react-icons/fi";
+import ProductImage from "./ProductImage";
 
 function getImageUrl(image) {
   if (typeof image === "string") {
@@ -66,11 +67,13 @@ export default function ProductGallery({
                       : "opacity-65 hover:opacity-100"
                   }`}
                 >
-                  <img
+                  <ProductImage
                     src={image}
                     alt={`${product?.name || "Product"} thumbnail ${
                       index + 1
                     }`}
+                    fill
+                    sizes="82px"
                     className="h-full w-full object-cover"
                   />
                 </button>
@@ -81,9 +84,14 @@ export default function ProductGallery({
 
         {/* Main Image */}
         <div className="relative min-w-0 max-w-full flex-1 overflow-hidden rounded-[28px] bg-[#141414] shadow-sm">
-          <img
+          <ProductImage
             src={selectedImage}
             alt={product?.name || "Product image"}
+            width={0}
+            height={0}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            loading="eager"
+            fetchPriority="high"
             className="block h-auto min-h-[420px] w-full max-w-full object-cover transition-all duration-300 hover:scale-105 sm:min-h-[500px] lg:h-full lg:min-h-0 lg:object-fill"
           />
 
@@ -131,11 +139,13 @@ export default function ProductGallery({
                     : "opacity-65 hover:opacity-100"
                 }`}
               >
-                <img
+                <ProductImage
                   src={image}
                   alt={`${product?.name || "Product"} thumbnail ${
                     index + 1
                   }`}
+                  fill
+                  sizes="(min-width: 640px) 20vw, 25vw"
                   className="block h-full w-full object-cover"
                 />
               </button>

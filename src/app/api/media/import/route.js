@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { putImage } from "@vercel/blob";
 import { connectDatabase } from "../../../../lib/db";
 import Media from "../../../../models/Media";
+import { requireAdmin } from "../../../../lib/auth";
 export const runtime = "nodejs";
 
 const allowedFolders = [
@@ -88,27 +89,8 @@ function getImageOptions(destination) {
 
 export async function POST(request) {
   try {
-    const authorization = request.headers.get("authorization");
-    const token = authorization?.replace("Bearer ", "");
-
-    if (!token) {
-      return NextResponse.json(
-        {
-          message: "Unauthorized request.",
-        },
-        {
-          status: 401,
-        },
-      );
-    }
-
-    /*
-      IMPORTANT:
-      Add the same JWT/admin verification logic that is already
-      used in src/app/api/blob/upload/route.js.
-
-      This endpoint must verify that token belongs to an admin.
-    */
+    // Only a logged-in admin may import images
+    await requireAdmin(request);
 
     const body = await request.json();
 
@@ -243,7 +225,7 @@ export async function POST(request) {
         message: error.message || "Unable to import and optimize this image.",
       },
       {
-        status: 500,
+        status: error.status || 500,
       },
     );
   }

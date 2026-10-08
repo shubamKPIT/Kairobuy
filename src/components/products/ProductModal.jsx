@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProductImage from "./ProductImage";
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -103,9 +104,12 @@ export default function ProductModal({
           <section className="bg-gray-50 p-5 sm:p-8">
             <div className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl bg-white">
               {selectedImage ? (
-                <img
+                <ProductImage
                   src={selectedImage}
                   alt={product.title || "Product image"}
+                  width={450}
+                  height={320}
+                  sizes="(min-width: 768px) 450px, 100vw"
                   className="h-[320px] w-full object-contain"
                 />
               ) : (
@@ -128,9 +132,12 @@ export default function ProductModal({
                         : "border-transparent"
                     }`}
                   >
-                    <img
+                    <ProductImage
                       src={image}
                       alt={product.title || "Product thumbnail"}
+                      width={80}
+                      height={80}
+                      sizes="80px"
                       className="h-full w-full object-contain"
                     />
                   </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FiArrowUpRight } from "react-icons/fi";
 
 const categories = [
@@ -195,10 +196,16 @@ export default function CategoryShowcase() {
                     : "min-h-[250px]"
                 } sm:min-h-[360px] lg:min-h-[420px]`}
               >
-                <img
+                <Image
                   key={imageUrl}
                   src={imageUrl}
                   alt={`${category.title} collection`}
+                  fill
+                  sizes={
+                    isLast
+                      ? "(min-width: 1024px) 20vw, 100vw"
+                      : "(min-width: 1024px) 20vw, 50vw"
+                  }
                   loading="lazy"
                   className="absolute inset-0 size-full object-cover transition duration-700 ease-out group-hover:scale-110"
                 />

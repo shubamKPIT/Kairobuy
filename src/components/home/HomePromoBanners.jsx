@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FiArrowRight } from "react-icons/fi";
 
 const promotions = [
@@ -107,10 +108,12 @@ export default function HomePromoBanners() {
                 className={`group relative min-h-[440px] overflow-hidden bg-gradient-to-br ${promotion.gradient} p-7 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl`}
               >
                 {imageSrc && (
-                  <img
+                  <Image
                     key={imageSrc}
                     src={imageSrc}
                     alt={promotion.title}
+                    fill
+                    sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
                     className="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
                   />
                 )}

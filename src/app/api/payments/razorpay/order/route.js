@@ -6,11 +6,23 @@ export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
+    if (process.env.ORDERS_DISABLED === "true") {
+      return NextResponse.json(
+        {
+          message: "Orders are temporarily unavailable. Please try again later.",
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
     await requireUser(request);
 
     const { amount } = await request.json();
 
-    if (!amount || amount <= 0) {
+    // The final amount is re-checked against the cart when the order is saved
+    if (!Number.isFinite(Number(amount)) || amount <= 0 || amount > 500000) {
       return NextResponse.json(
         {
           message: "Invalid amount",

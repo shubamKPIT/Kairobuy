@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FiArrowUpRight } from "react-icons/fi";
 
 const budgetCards = [
@@ -212,9 +213,15 @@ export default function ShopByBudget() {
                 } sm:min-h-[360px] lg:min-h-[420px]`}
               >
                 {imageUrl && (
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={`${card.title} budget collection`}
+                    fill
+                    sizes={
+                      isLast
+                        ? "(min-width: 1024px) 20vw, 100vw"
+                        : "(min-width: 1024px) 20vw, 50vw"
+                    }
                     loading="lazy"
                     className="absolute inset-0 size-full object-cover transition duration-700 ease-out group-hover:scale-110"
                   />

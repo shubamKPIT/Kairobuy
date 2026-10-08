@@ -5,6 +5,7 @@ import { connectDatabase } from "../../../lib/db";
 import Order from "../../../models/Order";
 import Product from "../../../models/Product";
 import "../../../models/User";
+import razorpayInstance from "../../../lib/razorpay";
 
 export const runtime = "nodejs";
 
@@ -20,19 +21,121 @@ function toQuantity(value) {
   return Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
 }
 
+const FREE_SHIPPING_ABOVE = 5000;
+const SHIPPING_CHARGE = 199;
+
 /*
-  Turns the cart items from the client into order items.
-  Adds productId and selectedSize so each ordered size is stored.
+  Builds order items from the DATABASE, not from the browser.
+
+  The browser only tells us which product, size and quantity.
+  Name, image and price always come from the product record, so a
+  customer cannot change prices by editing the request.
 */
-function normalizeItems(items) {
-  return items.map((item) => ({
-    productId: String(item.productId || item._id || ""),
-    name: item.name,
-    image: item.image,
-    price: item.price,
-    quantity: toQuantity(item.quantity),
-    selectedSize: String(item.selectedSize || "").trim(),
-  }));
+async function buildTrustedItems(items) {
+  const trustedItems = [];
+
+  for (const item of items) {
+    const productId = String(item?.productId || item?._id || "");
+    const quantity = toQuantity(item?.quantity);
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      throw createHttpError("A product in your bag is invalid.", 400);
+    }
+
+    if (quantity < 1 || quantity > 20) {
+      throw createHttpError("Invalid quantity in your bag.", 400);
+    }
+
+    const product = await Product.findById(productId)
+      .select("name image price isActive purchaseMode source")
+      .lean();
+
+    if (!product || product.isActive === false) {
+      throw createHttpError(
+        `${item?.name || "A product"} is no longer available.`,
+        404
+      );
+    }
+
+    if (product.purchaseMode === "EXTERNAL_LINK" || product.source === "AMAZON") {
+      throw createHttpError(
+        `${product.name} is sold on a partner website and cannot be ordered here.`,
+        400
+      );
+    }
+
+    trustedItems.push({
+      productId,
+      name: product.name,
+      image: product.image,
+      price: Number(product.price || 0),
+      quantity,
+      selectedSize: String(item?.selectedSize || "").trim(),
+    });
+  }
+
+  return trustedItems;
+}
+
+/*
+  Confirms with Razorpay (using the secret key, server to server) that the
+  payment really happened, belongs to this Razorpay order, and matches the
+  total we calculated.
+*/
+async function verifyOnlinePayment({ paymentId, razorpayOrderId, total }) {
+  if (!paymentId || !razorpayOrderId) {
+    throw createHttpError("Payment details are missing.", 400);
+  }
+
+  const alreadyUsed = await Order.exists({
+    $or: [{ paymentId }, { razorpayOrderId }],
+  });
+
+  if (alreadyUsed) {
+    throw createHttpError("This payment has already been used.", 409);
+  }
+
+  let payment;
+
+  try {
+    payment = await razorpayInstance.payments.fetch(paymentId);
+  } catch {
+    throw createHttpError("Unable to verify your payment.", 402);
+  }
+
+  const expectedAmount = Math.round(total * 100);
+
+  const isValid =
+    payment?.order_id === razorpayOrderId &&
+    payment?.amount === expectedAmount &&
+    ["captured", "authorized"].includes(payment?.status);
+
+  if (!isValid) {
+    throw createHttpError(
+      "Payment does not match this order. Please contact support if money was deducted.",
+      402
+    );
+  }
+}
+
+function validateShippingAddress(address) {
+  const fields = ["fullName", "phone", "address", "city", "state", "pincode"];
+
+  const clean = {};
+
+  for (const field of fields) {
+    clean[field] = String(address?.[field] || "").trim();
+
+    if (!clean[field]) {
+      throw createHttpError("Please fill all shipping details.", 400);
+    }
+  }
+
+  if (!/^\d{10}$/.test(clean.phone) || !/^\d{6}$/.test(clean.pincode)) {
+    throw createHttpError("Phone or pincode is not valid.", 400);
+  }
+
+  return clean;
 }
 
 async function restoreSizeStock(reservedItems) {
@@ -139,21 +242,21 @@ async function reserveSizeStock(items) {
 
 export async function POST(request) {
   try {
+    // Server-side switch: set ORDERS_DISABLED=true in your environment
+    // variables to stop all new orders, even from direct API calls.
+    if (process.env.ORDERS_DISABLED === "true") {
+      throw createHttpError(
+        "Orders are temporarily unavailable. Please try again later.",
+        503
+      );
+    }
+
     const user = await requireUser(request);
 
-    const {
-      items,
-      shippingAddress,
-      subtotal,
-      shippingCharge,
-      total,
-      paymentMethod,
-      paymentStatus,
-      paymentId,
-      razorpayOrderId,
-    } = await request.json();
+    const { items, shippingAddress, paymentMethod, paymentId, razorpayOrderId } =
+      await request.json();
 
-    if (!items || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         {
           message: "Cart is empty",
@@ -166,7 +269,26 @@ export async function POST(request) {
 
     await connectDatabase();
 
-    const orderItems = normalizeItems(items);
+    const cleanAddress = validateShippingAddress(shippingAddress);
+
+    // Prices come from the database, totals are calculated here
+    const orderItems = await buildTrustedItems(items);
+
+    const subtotal = orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const shippingCharge = subtotal > FREE_SHIPPING_ABOVE ? 0 : SHIPPING_CHARGE;
+    const total = subtotal + shippingCharge;
+
+    const method = paymentMethod === "online" ? "online" : "cod";
+    let paymentStatus = "Pending";
+
+    if (method === "online") {
+      await verifyOnlinePayment({ paymentId, razorpayOrderId, total });
+      paymentStatus = "Paid";
+    }
 
     const reservedItems = await reserveSizeStock(orderItems);
 
@@ -174,14 +296,14 @@ export async function POST(request) {
       const newOrder = new Order({
         userId: user._id,
         items: orderItems,
-        shippingAddress,
+        shippingAddress: cleanAddress,
         subtotal,
         shippingCharge,
         total,
-        paymentMethod: paymentMethod || "cod",
-        paymentStatus: paymentStatus || "Pending",
-        paymentId: paymentId || "",
-        razorpayOrderId: razorpayOrderId || "",
+        paymentMethod: method,
+        paymentStatus,
+        paymentId: method === "online" ? paymentId : "",
+        razorpayOrderId: method === "online" ? razorpayOrderId : "",
       });
 
       await newOrder.save();

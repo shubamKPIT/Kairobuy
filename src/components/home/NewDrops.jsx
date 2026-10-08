@@ -8,6 +8,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { fetchProducts } from "../../services/productService";
+import ProductImage from "../products/ProductImage";
 
 const MIN_ITEMS_PER_SET = 8;
 const SECONDS_PER_CARD = 5;
@@ -98,9 +99,11 @@ function DropCard({ product }) {
       className="group/card relative block h-[340px] overflow-hidden border border-black/5 transition-transform duration-300 hover:-translate-y-2 sm:h-96"
     >
       {image && (
-        <img
+        <ProductImage
           src={image}
           alt={product.name || "Product"}
+          fill
+          sizes="(min-width: 640px) 280px, 250px"
           draggable={false}
           className="size-full object-cover transition-transform duration-500 group-hover/card:scale-105"
         />

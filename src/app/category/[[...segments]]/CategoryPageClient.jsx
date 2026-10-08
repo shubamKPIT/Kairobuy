@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   FiArrowRight,
   FiCheckCircle,
   FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
   FiFilter,
   FiLayers,
   FiRefreshCw,
@@ -57,6 +59,9 @@ const priceOptionToQueryMap = {
 /* Shared page gutter: 16px on phones, 24px tablet, 32px desktop */
 const GUTTER = "px-4 sm:px-6 lg:px-8";
 
+const DESKTOP_PRODUCTS_PER_PAGE = 40;
+const MOBILE_PRODUCTS_PER_PAGE = 30;
+
 const typeOptions = [
   { label: "All", value: "all" },
   { label: "Delivery products", value: "delivery" },
@@ -80,12 +85,110 @@ function ProductRow({ products }) {
   );
 }
 
+function FeaturedProductCarousel({ products }) {
+  const carouselRef = useRef(null);
+
+  const scrollCarousel = (direction) => {
+    carouselRef.current?.scrollBy({
+      left: direction === "left" ? -320 : 320,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Previous featured products"
+        onClick={() => scrollCarousel("left")}
+        className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-950 shadow-lg transition hover:bg-zinc-950 hover:text-white sm:left-3"
+      >
+        <FiArrowRight className="rotate-180" size={18} />
+      </button>
+
+      <div
+        ref={carouselRef}
+        className="grid auto-cols-[calc((100%-0.75rem)/2)] grid-flow-col gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] sm:auto-cols-[calc((100%-2.25rem)/4)] sm:gap-4 lg:auto-cols-[calc((100%-4rem)/5)] [&::-webkit-scrollbar]:hidden"
+      >
+        {products.map((product) => (
+          <div key={product._id} className="min-w-0">
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        aria-label="Next featured products"
+        onClick={() => scrollCarousel("right")}
+        className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-950 shadow-lg transition hover:bg-zinc-950 hover:text-white sm:right-3"
+      >
+        <FiArrowRight size={18} />
+      </button>
+    </div>
+  );
+}
+
+function ProductPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) {
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="mt-10 flex items-center justify-center gap-3 sm:mt-12">
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2.5 text-sm font-extrabold text-zinc-950 transition hover:border-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <FiChevronLeft size={18} />
+        <span className="hidden sm:inline">Previous</span>
+      </button>
+
+      <span className="min-w-[90px] text-center text-sm font-bold text-zinc-600">
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2.5 text-sm font-extrabold text-zinc-950 transition hover:border-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <span className="hidden sm:inline">Next</span>
+        <FiChevronRight size={18} />
+      </button>
+    </div>
+  );
+}
+
 function TrustStrip() {
   const trustItems = [
-    { icon: FiShield, title: "Secure payments", text: "Safe and protected checkout" },
-    { icon: FiRefreshCw, title: "Easy returns", text: "Simple return support" },
-    { icon: FiTruck, title: "Fast delivery", text: "Products delivered with care" },
-    { icon: FiCheckCircle, title: "Curated products", text: "Selected for everyday life" },
+    {
+      icon: FiShield,
+      title: "Secure payments",
+      text: "Safe and protected checkout",
+    },
+    {
+      icon: FiRefreshCw,
+      title: "Easy returns",
+      text: "Simple return support",
+    },
+    {
+      icon: FiTruck,
+      title: "Fast delivery",
+      text: "Products delivered with care",
+    },
+    {
+      icon: FiCheckCircle,
+      title: "Curated products",
+      text: "Selected for everyday life",
+    },
   ];
 
   return (
@@ -108,6 +211,7 @@ function TrustStrip() {
                   <p className="text-[13px] font-black text-zinc-950 sm:text-sm">
                     {item.title}
                   </p>
+
                   <p className="mt-0.5 text-[11px] leading-4 text-zinc-500 sm:text-xs">
                     {item.text}
                   </p>
@@ -121,7 +225,13 @@ function TrustStrip() {
   );
 }
 
-function SectionHeading({ eyebrow, title, description, href, linkText }) {
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  href,
+  linkText,
+}) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
       <div className="max-w-2xl">
@@ -250,7 +360,6 @@ function FilterContent({
         </div>
       </div>
 
-      {/* Affiliate products have no Kairobuy price, so hide the price filter */}
       {selectedType !== "affiliate" && (
         <div>
           <h3 className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
@@ -290,19 +399,25 @@ export default function CategoryPageClient({
       : ["all"];
 
   const departmentSlug = String(segments[0] || "all").toLowerCase();
-  const subcategorySlug = segments[1] ? String(segments[1]).toLowerCase() : "";
+  const subcategorySlug = segments[1]
+    ? String(segments[1]).toLowerCase()
+    : "";
 
-  // Price filter lives in the URL, so it is derived rather than stored in state
   const priceQuery = String(searchParams.get("price") || "").toLowerCase();
   const selectedPrice = priceQueryMap[priceQuery] || "All";
 
-  // Product type filter also lives in the URL: /category/all?type=affiliate
   const typeQuery = String(searchParams.get("type") || "").toLowerCase();
   const selectedType = ["affiliate", "delivery"].includes(typeQuery)
     ? typeQuery
     : "all";
 
-  // Update one or more query params (null removes the param)
+  const pageQuery = Number(searchParams.get("page") || 1);
+
+  const currentPage =
+    Number.isFinite(pageQuery) && pageQuery > 0
+      ? Math.floor(pageQuery)
+      : 1;
+
   const updateQuery = (changes) => {
     const nextSearchParams = new URLSearchParams(searchParams.toString());
 
@@ -326,15 +441,48 @@ export default function CategoryPageClient({
   };
 
   const handlePriceChange = (nextPrice) => {
-    updateQuery({ price: priceOptionToQueryMap[nextPrice] || null });
+    updateQuery({
+      price: priceOptionToQueryMap[nextPrice] || null,
+      page: null,
+    });
   };
 
   const handleTypeChange = (nextType) => {
     updateQuery({
       type: nextType === "all" ? null : nextType,
-      // Affiliate products have no price, so drop the price filter
+      page: null,
       ...(nextType === "affiliate" ? { price: null } : {}),
     });
+  };
+
+  const handlePageChange = (nextPage) => {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+    if (nextPage <= 1) {
+      nextSearchParams.delete("page");
+    } else {
+      nextSearchParams.set("page", String(nextPage));
+    }
+
+    const categoryPath = `/category/${segments
+      .map((segment) => encodeURIComponent(segment))
+      .join("/")}`;
+
+    const queryString = nextSearchParams.toString();
+
+    router.push(
+      queryString ? `${categoryPath}?${queryString}` : categoryPath,
+      {
+        scroll: false,
+      },
+    );
+
+    window.setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 50);
   };
 
   const [mediaOverrides] = useState(initialMediaOverrides || {});
@@ -366,8 +514,6 @@ export default function CategoryPageClient({
     ? subcategory.description
     : department?.subtitle || "";
 
-  // Products come from the server. The parent page remounts this component
-  // per route (via `key`), so reading the prop directly is always current.
   const products = initialProducts;
 
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -377,7 +523,28 @@ export default function CategoryPageClient({
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  // Reset local filters when the route changes
+  const [productsPerPage, setProductsPerPage] = useState(
+    DESKTOP_PRODUCTS_PER_PAGE,
+  );
+
+  useEffect(() => {
+    const updateProductsPerPage = () => {
+      setProductsPerPage(
+        window.innerWidth < 640
+          ? MOBILE_PRODUCTS_PER_PAGE
+          : DESKTOP_PRODUCTS_PER_PAGE,
+      );
+    };
+
+    updateProductsPerPage();
+
+    window.addEventListener("resize", updateProductsPerPage);
+
+    return () => {
+      window.removeEventListener("resize", updateProductsPerPage);
+    };
+  }, []);
+
   useEffect(() => {
     setSelectedFilter("All");
     setSelectedBrand("All");
@@ -386,10 +553,12 @@ export default function CategoryPageClient({
     setIsSortOpen(false);
   }, [departmentSlug, subcategorySlug]);
 
-  // Opened from a link like /category/all?type=affiliate: jump straight to
-  // the products section where the filters are
   useEffect(() => {
-    if (typeQuery !== "affiliate" && typeQuery !== "delivery") {
+    const hasPriceFilter = Boolean(priceQuery);
+    const hasTypeFilter =
+      typeQuery === "affiliate" || typeQuery === "delivery";
+
+    if (!hasPriceFilter && !hasTypeFilter) {
       return;
     }
 
@@ -401,7 +570,7 @@ export default function CategoryPageClient({
     }, 150);
 
     return () => clearTimeout(timer);
-    // run once when the page opens
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -438,7 +607,8 @@ export default function CategoryPageClient({
     ];
   }, [department, subcategory]);
 
-  const filterTitle = department?.slug === "all" ? "Department" : "Subcategory";
+  const filterTitle =
+    department?.slug === "all" ? "Department" : "Subcategory";
 
   const brands = useMemo(() => {
     return Array.from(
@@ -461,7 +631,7 @@ export default function CategoryPageClient({
   const featuredProducts = useMemo(() => {
     return products
       .filter((product) => product.isFeatured === true)
-      .slice(0, 4);
+      .slice(0, 10);
   }, [products]);
 
   const finalProducts = useMemo(() => {
@@ -503,7 +673,6 @@ export default function CategoryPageClient({
       result = result.filter((product) => !isAffiliateProduct(product));
     }
 
-    // Price ranges only make sense for products sold on Kairobuy
     if (selectedPrice !== "All") {
       result = result.filter((product) => !isAffiliateProduct(product));
     }
@@ -543,21 +712,24 @@ export default function CategoryPageClient({
     if (sortOption === "Price: Low to High") {
       return result.sort(
         (firstProduct, secondProduct) =>
-          Number(firstProduct.price || 0) - Number(secondProduct.price || 0),
+          Number(firstProduct.price || 0) -
+          Number(secondProduct.price || 0),
       );
     }
 
     if (sortOption === "Price: High to Low") {
       return result.sort(
         (firstProduct, secondProduct) =>
-          Number(secondProduct.price || 0) - Number(firstProduct.price || 0),
+          Number(secondProduct.price || 0) -
+          Number(firstProduct.price || 0),
       );
     }
 
     if (sortOption === "Top Rated") {
       return result.sort(
         (firstProduct, secondProduct) =>
-          Number(secondProduct.rating || 0) - Number(firstProduct.rating || 0),
+          Number(secondProduct.rating || 0) -
+          Number(firstProduct.rating || 0),
       );
     }
 
@@ -571,6 +743,20 @@ export default function CategoryPageClient({
     selectedType,
     sortOption,
   ]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(finalProducts.length / productsPerPage),
+  );
+
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+
+    return finalProducts.slice(startIndex, endIndex);
+  }, [finalProducts, productsPerPage, safeCurrentPage]);
 
   if (!isValidRoute) {
     return (
@@ -611,7 +797,9 @@ export default function CategoryPageClient({
     department.slug === "new" ? "/category/all" : "/category/new";
 
   const heroSecondaryLabel =
-    department.slug === "new" ? "Explore all products" : "Explore New Drops";
+    department.slug === "new"
+      ? "Explore all products"
+      : "Explore New Drops";
 
   const shouldShowCollectionCards =
     isDepartmentLanding &&
@@ -639,6 +827,16 @@ export default function CategoryPageClient({
         : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-950"
     }`;
 
+  const firstProductNumber =
+    finalProducts.length === 0
+      ? 0
+      : (safeCurrentPage - 1) * productsPerPage + 1;
+
+  const lastProductNumber = Math.min(
+    safeCurrentPage * productsPerPage,
+    finalProducts.length,
+  );
+
   return (
     <main className="min-h-screen overflow-x-clip bg-zinc-50">
       {/* ---------- HERO ---------- */}
@@ -651,7 +849,9 @@ export default function CategoryPageClient({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20 sm:bg-gradient-to-r sm:from-black/85 sm:via-black/55 sm:to-black/20" />
 
-        <div className={`relative z-10 mx-auto flex min-h-[480px] max-w-full items-end py-10 sm:min-h-[450px] sm:py-16 lg:min-h-[560px] lg:py-20 ${GUTTER}`}>
+        <div
+          className={`relative z-10 mx-auto flex min-h-[480px] max-w-full items-end py-10 sm:min-h-[450px] sm:py-16 lg:min-h-[560px] lg:py-20 ${GUTTER}`}
+        >
           <div className="w-full max-w-3xl text-white">
             <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold text-white/70 sm:text-xs">
               <Link href="/" className="transition hover:text-white">
@@ -715,9 +915,11 @@ export default function CategoryPageClient({
 
       <TrustStrip />
 
-      {/* ---------- COLLECTION CARDS (2 columns on mobile) ---------- */}
+      {/* ---------- COLLECTION CARDS ---------- */}
       {shouldShowCollectionCards && (
-        <section className={`mx-auto max-w-full py-10 sm:py-16 lg:py-20 ${GUTTER}`}>
+        <section
+          className={`mx-auto max-w-full py-10 sm:py-16 lg:py-20 ${GUTTER}`}
+        >
           <SectionHeading
             eyebrow="Shop by collection"
             title={`Shop ${department.title}`}
@@ -766,13 +968,13 @@ export default function CategoryPageClient({
             />
 
             <div className="mt-6 sm:mt-9">
-              <ProductRow products={featuredProducts} />
+              <FeaturedProductCarousel products={featuredProducts} />
             </div>
           </div>
         </section>
       )}
 
-      {/* ---------- BRANDS (swipeable row on mobile) ---------- */}
+      {/* ---------- BRANDS ---------- */}
       {shouldShowBrands && (
         <section className="border-y border-zinc-200 bg-white py-8 sm:py-14">
           <div className={`mx-auto max-w-full ${GUTTER}`}>
@@ -933,7 +1135,9 @@ export default function CategoryPageClient({
                 </p>
 
                 <h2 className="mt-2 flex items-center gap-2 text-2xl font-black tracking-tight text-zinc-950 sm:gap-3 sm:text-4xl">
-                  {subcategory && <FiLayers className="size-6 shrink-0 sm:size-7" />}
+                  {subcategory && (
+                    <FiLayers className="size-6 shrink-0 sm:size-7" />
+                  )}
 
                   <span className="min-w-0 break-words">
                     {subcategory
@@ -947,9 +1151,8 @@ export default function CategoryPageClient({
                 </h2>
 
                 <p className="mt-2 text-xs text-zinc-500 sm:text-sm">
-                  {`Showing ${finalProducts.length} product${
-                    finalProducts.length === 1 ? "" : "s"
-                  }`}
+                  Showing {firstProductNumber}-{lastProductNumber} of{" "}
+                  {finalProducts.length} products
                 </p>
               </div>
 
@@ -963,7 +1166,9 @@ export default function CategoryPageClient({
 
                   <FiChevronDown
                     size={17}
-                    className={`shrink-0 transition ${isSortOpen ? "rotate-180" : ""}`}
+                    className={`shrink-0 transition ${
+                      isSortOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
@@ -1034,7 +1239,12 @@ export default function CategoryPageClient({
                       setSelectedFilter("All");
                       setSelectedBrand("All");
                       setSortOption("Newest");
-                      updateQuery({ price: null, type: null });
+
+                      updateQuery({
+                        price: null,
+                        type: null,
+                        page: null,
+                      });
                     }}
                     className="mt-5 rounded-full bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
                   >
@@ -1043,7 +1253,15 @@ export default function CategoryPageClient({
                 </div>
               </div>
             ) : (
-              <ProductRow products={finalProducts} />
+              <>
+                <ProductRow products={paginatedProducts} />
+
+                <ProductPagination
+                  currentPage={safeCurrentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </>
             )}
           </section>
         </div>

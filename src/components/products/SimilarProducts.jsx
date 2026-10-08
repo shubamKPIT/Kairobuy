@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FiChevronLeft, FiChevronRight, FiStar } from "react-icons/fi";
 import { fetchProducts } from "../../services/productService";
+import ProductImage from "./ProductImage";
 
 const PRODUCT_PATH = "/product";
 
@@ -34,12 +35,13 @@ function SimilarCard({ item }) {
       href={`${PRODUCT_PATH}/${item._id}`}
       className="group w-44 shrink-0 snap-start sm:w-52"
     >
-      <div className="aspect-square overflow-hidden rounded-lg bg-zinc-100">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-zinc-100">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <ProductImage
             src={image}
             alt={item.name}
+            fill
+            sizes="(min-width: 640px) 208px, 176px"
             loading="lazy"
             className="h-full w-full object-cover"
           />

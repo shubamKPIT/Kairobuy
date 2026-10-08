@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import NextImage, { getImageProps } from "next/image";
 import {
   AnimatePresence,
   motion,
@@ -48,7 +49,7 @@ const slides = [
         sub: "Complete the look",
         route: "/category/women",
         image:
-          "https://chromeindustries.com/cdn/shop/files/YearMonthDay_HP-MiniKadetReviews-Desktop_1.jpg?v=1777045669&width=2000",
+          "https://images.pexels.com/photos/37401994/pexels-photo-37401994.jpeg",
       },
     ],
   },
@@ -78,11 +79,39 @@ const slides = [
         sub: "Customer favorites",
         route: "/category/men",
         image:
-          "https://chromeindustries.com/cdn/shop/files/041526_Rim-homepage-Desktop-V2_1.jpg?v=1776289664&width=2000",
+          "https://images.pexels.com/photos/8706563/pexels-photo-8706563.jpeg",
       },
     ],
   },
 ];
+
+/* ---------- Optimised hero images ---------- */
+
+const HERO_SIZES = "100vw";
+
+/*
+  Builds resized + compressed image URLs (WebP/AVIF) through Next.js,
+  instead of downloading the original full-size Pexels file.
+*/
+function getHeroImageProps(slide) {
+  const { props: desktop } = getImageProps({
+    src: slide.image,
+    alt: "",
+    width: 1920,
+    height: 1080,
+    sizes: HERO_SIZES,
+  });
+
+  const { props: mobile } = getImageProps({
+    src: slide.mobileImage,
+    alt: "",
+    width: 828,
+    height: 1472,
+    sizes: HERO_SIZES,
+  });
+
+  return { desktop, mobile };
+}
 
 /* ---------- Text animation variants ---------- */
 
@@ -121,6 +150,9 @@ export default function Hero() {
   const currentSlide = slides[currentIndex];
   const isCenter = currentSlide.align === "center";
 
+  const { desktop: desktopImage, mobile: mobileImage } =
+    getHeroImageProps(currentSlide);
+
   /* ---------- Preload images ---------- */
 
   useEffect(() => {
@@ -130,8 +162,14 @@ export default function Hero() {
     const loads = slides.map(
       (slide) =>
         new Promise((resolve) => {
+          const { desktop, mobile } = getHeroImageProps(slide);
+          const chosen = isMobile ? mobile : desktop;
+
+          // Preload the SAME optimised file the page will actually show
           const img = new Image();
-          img.src = isMobile ? slide.mobileImage : slide.image;
+          img.sizes = chosen.sizes;
+          img.srcset = chosen.srcSet;
+          img.src = chosen.src;
           if (typeof img.decode === "function") {
             img.decode().then(resolve, resolve);
           } else {
@@ -211,11 +249,16 @@ export default function Hero() {
             <picture className="block size-full">
               <source
                 media="(max-width: 768px)"
-                srcSet={currentSlide.mobileImage}
+                srcSet={mobileImage.srcSet}
+                sizes={mobileImage.sizes}
               />
               <motion.img
-                src={currentSlide.image}
+                src={desktopImage.src}
+                srcSet={desktopImage.srcSet}
+                sizes={desktopImage.sizes}
                 alt=""
+                loading="eager"
+                fetchPriority="high"
                 decoding="async"
                 draggable={false}
                 initial={reduceMotion ? false : { scale: 1.12 }}
@@ -340,10 +383,12 @@ export default function Hero() {
                 className="group/card flex items-center gap-2.5 rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md transition-colors duration-300 active:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
               >
                 <span className="relative block size-12 shrink-0 overflow-hidden rounded-xl bg-white/10">
-                  <img
+                  <NextImage
                     src={card.image}
                     alt=""
-                    loading="lazy"
+                    width={96}
+                    height={96}
+                    sizes="48px"
                     draggable={false}
                     className="size-full object-cover"
                   />

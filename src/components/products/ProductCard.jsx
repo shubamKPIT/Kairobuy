@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FiHeart, FiShoppingBag, FiStar } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { useWishlist } from "../../context/WishlistContext";
+import ProductImage from "./ProductImage";
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -132,9 +133,11 @@ export default function ProductCard({ product }) {
     >
       {/* Image */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-100">
-        <img
+        <ProductImage
           src={images[activeImage]}
           alt={name}
+          fill
+          sizes="(min-width: 1024px) 25vw, 50vw"
           loading="lazy"
           className="size-full object-cover"
         />

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiChevronLeft, FiMinus, FiPlus, FiShoppingBag, FiTrash2, FiX } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
+import ProductImage from "../products/ProductImage";
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -160,9 +161,12 @@ export default function CartDrawer({ isOpen, onClose }) {
                   >
                     {/* Image */}
                     <div className="aspect-[1/1.15] overflow-hidden rounded-xl bg-zinc-100">
-                      <img
+                      <ProductImage
                         src={item.image || "/images/product-placeholder.png"}
                         alt={item.name || "Cart product"}
+                        width={92}
+                        height={106}
+                        sizes="92px"
                         className="h-full w-full object-cover"
                       />
                     </div>

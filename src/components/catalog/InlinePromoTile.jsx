@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ProductImage from "../products/ProductImage";
 
 export default function InlinePromoTile({
   href = "/category/all",
@@ -13,9 +14,11 @@ export default function InlinePromoTile({
       aria-label={title}
       className="group relative block min-h-[420px] overflow-hidden rounded-xl bg-zinc-100 sm:min-h-[500px]"
     >
-      <img
+      <ProductImage
         src={imageUrl}
         alt={title}
+        fill
+        sizes="(min-width: 1024px) 25vw, 50vw"
         loading="lazy"
         className="absolute inset-0 size-full object-cover"
       />
