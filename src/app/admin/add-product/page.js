@@ -711,7 +711,7 @@ export default function AddProductPage() {
                   onChange={handleDepartmentChange}
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"
                 >
-                  <option value="ALL">Select department</option>
+                  <option value="ALL">All Products</option>
 
                   {departmentOptions.map((department) => (
                     <option key={department.key} value={department.key}>

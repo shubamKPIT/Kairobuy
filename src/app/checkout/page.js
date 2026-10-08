@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  FiAlertTriangle,
   FiCheckCircle,
   FiCreditCard,
   FiLock,
@@ -22,6 +23,9 @@ import {
   verifyRazorpayPayment,
 } from "../../services/paymentService";
 import { createOrder } from "../../services/orderService";
+
+// Set to false when real inventory is ready to accept delivery orders
+const ORDERS_UNDER_MAINTENANCE = true;
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -70,6 +74,7 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
 
   const [shipping, setShipping] = useState({
     fullName: "",
@@ -336,6 +341,12 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setErrorMessage("");
     setSuccessMessage("");
+
+    // Block all orders while delivery products are under maintenance
+    if (ORDERS_UNDER_MAINTENANCE) {
+      setShowMaintenanceModal(true);
+      return;
+    }
 
     if (!validateCheckout()) {
       return;
@@ -769,6 +780,57 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
+
+      {/* Maintenance popup */}
+      {showMaintenanceModal && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/60 px-4 backdrop-blur-sm"
+          onClick={() => setShowMaintenanceModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="maintenance-title"
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-amber-50 text-amber-600">
+              <FiAlertTriangle size={26} />
+            </div>
+
+            <h2
+              id="maintenance-title"
+              className="mt-5 text-2xl font-black tracking-tight text-zinc-950"
+            >
+              Delivery is under maintenance
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-zinc-600">
+              Our delivery products are currently under maintenance, so we
+              can&apos;t accept orders right now. Affiliate products are
+              working normally and will take you directly to the partner
+              website.
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Link
+                href="/category/all?type=affiliate"
+                className="inline-flex justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
+              >
+                Browse affiliate products
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setShowMaintenanceModal(false)}
+                className="inline-flex justify-center rounded-full border border-zinc-200 px-5 py-3 text-sm font-extrabold text-zinc-700 transition hover:border-zinc-400"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

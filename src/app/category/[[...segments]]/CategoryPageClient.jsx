@@ -57,6 +57,19 @@ const priceOptionToQueryMap = {
 /* Shared page gutter: 16px on phones, 24px tablet, 32px desktop */
 const GUTTER = "px-4 sm:px-6 lg:px-8";
 
+const typeOptions = [
+  { label: "All", value: "all" },
+  { label: "Delivery products", value: "delivery" },
+  { label: "Affiliate products", value: "affiliate" },
+];
+
+// Affiliate products open on a partner site instead of Kairobuy checkout
+function isAffiliateProduct(product) {
+  return (
+    product.purchaseMode === "EXTERNAL_LINK" || product.source === "AMAZON"
+  );
+}
+
 function ProductRow({ products }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
@@ -186,6 +199,8 @@ function FilterContent({
   setSelectedFilter,
   selectedPrice,
   onPriceChange,
+  selectedType,
+  onTypeChange,
   filterTitle = "Subcategory",
 }) {
   const chip = (active) =>
@@ -218,22 +233,44 @@ function FilterContent({
 
       <div>
         <h3 className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
-          Price range
+          Product type
         </h3>
 
         <div className="flex flex-wrap gap-2 lg:flex-col">
-          {priceOptions.map((price) => (
+          {typeOptions.map((option) => (
             <button
-              key={price}
+              key={option.value}
               type="button"
-              onClick={() => onPriceChange(price)}
-              className={chip(selectedPrice === price)}
+              onClick={() => onTypeChange(option.value)}
+              className={chip(selectedType === option.value)}
             >
-              {price}
+              {option.label}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Affiliate products have no Kairobuy price, so hide the price filter */}
+      {selectedType !== "affiliate" && (
+        <div>
+          <h3 className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
+            Price range
+          </h3>
+
+          <div className="flex flex-wrap gap-2 lg:flex-col">
+            {priceOptions.map((price) => (
+              <button
+                key={price}
+                type="button"
+                onClick={() => onPriceChange(price)}
+                className={chip(selectedPrice === price)}
+              >
+                {price}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -259,15 +296,23 @@ export default function CategoryPageClient({
   const priceQuery = String(searchParams.get("price") || "").toLowerCase();
   const selectedPrice = priceQueryMap[priceQuery] || "All";
 
-  const handlePriceChange = (nextPrice) => {
-    const nextSearchParams = new URLSearchParams(searchParams.toString());
-    const priceQueryValue = priceOptionToQueryMap[nextPrice];
+  // Product type filter also lives in the URL: /category/all?type=affiliate
+  const typeQuery = String(searchParams.get("type") || "").toLowerCase();
+  const selectedType = ["affiliate", "delivery"].includes(typeQuery)
+    ? typeQuery
+    : "all";
 
-    if (nextPrice === "All" || !priceQueryValue) {
-      nextSearchParams.delete("price");
-    } else {
-      nextSearchParams.set("price", priceQueryValue);
-    }
+  // Update one or more query params (null removes the param)
+  const updateQuery = (changes) => {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+    Object.entries(changes).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        nextSearchParams.delete(key);
+      } else {
+        nextSearchParams.set(key, value);
+      }
+    });
 
     const categoryPath = `/category/${segments
       .map((segment) => encodeURIComponent(segment))
@@ -277,6 +322,18 @@ export default function CategoryPageClient({
 
     router.push(queryString ? `${categoryPath}?${queryString}` : categoryPath, {
       scroll: false,
+    });
+  };
+
+  const handlePriceChange = (nextPrice) => {
+    updateQuery({ price: priceOptionToQueryMap[nextPrice] || null });
+  };
+
+  const handleTypeChange = (nextType) => {
+    updateQuery({
+      type: nextType === "all" ? null : nextType,
+      // Affiliate products have no price, so drop the price filter
+      ...(nextType === "affiliate" ? { price: null } : {}),
     });
   };
 
@@ -328,6 +385,25 @@ export default function CategoryPageClient({
     setIsMobileFiltersOpen(false);
     setIsSortOpen(false);
   }, [departmentSlug, subcategorySlug]);
+
+  // Opened from a link like /category/all?type=affiliate: jump straight to
+  // the products section where the filters are
+  useEffect(() => {
+    if (typeQuery !== "affiliate" && typeQuery !== "delivery") {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+
+    return () => clearTimeout(timer);
+    // run once when the page opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!isMobileFiltersOpen) {
@@ -421,6 +497,17 @@ export default function CategoryPageClient({
       );
     }
 
+    if (selectedType === "affiliate") {
+      result = result.filter(isAffiliateProduct);
+    } else if (selectedType === "delivery") {
+      result = result.filter((product) => !isAffiliateProduct(product));
+    }
+
+    // Price ranges only make sense for products sold on Kairobuy
+    if (selectedPrice !== "All") {
+      result = result.filter((product) => !isAffiliateProduct(product));
+    }
+
     if (selectedPrice === "Under ₹1000") {
       result = result.filter((product) => Number(product.price || 0) < 1000);
     }
@@ -481,6 +568,7 @@ export default function CategoryPageClient({
     selectedBrand,
     selectedFilter,
     selectedPrice,
+    selectedType,
     sortOption,
   ]);
 
@@ -782,6 +870,8 @@ export default function CategoryPageClient({
                   setSelectedFilter={setSelectedFilter}
                   selectedPrice={selectedPrice}
                   onPriceChange={handlePriceChange}
+                  selectedType={selectedType}
+                  onTypeChange={handleTypeChange}
                   filterTitle={filterTitle}
                 />
               </div>
@@ -824,6 +914,8 @@ export default function CategoryPageClient({
                 setSelectedFilter={setSelectedFilter}
                 selectedPrice={selectedPrice}
                 onPriceChange={handlePriceChange}
+                selectedType={selectedType}
+                onTypeChange={handleTypeChange}
                 filterTitle={filterTitle}
               />
             </div>
@@ -899,6 +991,31 @@ export default function CategoryPageClient({
               </div>
             </div>
 
+            <div className="mb-5 flex flex-wrap gap-2">
+              {typeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleTypeChange(option.value)}
+                  className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
+                    selectedType === option.value
+                      ? "border-zinc-950 bg-zinc-950 text-white"
+                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {selectedType === "affiliate" && (
+              <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 sm:text-sm">
+                These products open on a partner&apos;s website, where you
+                complete your purchase. Kairobuy may earn a commission at no
+                extra cost to you.
+              </p>
+            )}
+
             {finalProducts.length === 0 ? (
               <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-center sm:min-h-80 sm:p-8">
                 <div>
@@ -917,7 +1034,7 @@ export default function CategoryPageClient({
                       setSelectedFilter("All");
                       setSelectedBrand("All");
                       setSortOption("Newest");
-                      handlePriceChange("All");
+                      updateQuery({ price: null, type: null });
                     }}
                     className="mt-5 rounded-full bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
                   >

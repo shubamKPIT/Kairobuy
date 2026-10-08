@@ -5,7 +5,12 @@ import Product from "../models/Product";
  * Server-only product query. Same filtering rules as /api/products,
  * but runs directly against the database (no HTTP call, no in-memory cache).
  */
-export async function getProducts({ department, subcategory, newOnly } = {}) {
+export async function getProducts({
+  department,
+  subcategory,
+  newOnly,
+  affiliateOnly,
+} = {}) {
   await connectDatabase();
 
   const filter = {
@@ -23,6 +28,12 @@ export async function getProducts({ department, subcategory, newOnly } = {}) {
 
   if (newOnly) {
     filter.newCategory = "new";
+  }
+
+  // Affiliate / external products: they link out to a partner site
+  // instead of going through Kairobuy checkout.
+  if (affiliateOnly) {
+    filter.$or = [{ purchaseMode: "EXTERNAL_LINK" }, { source: "AMAZON" }];
   }
 
   const products = await Product.find(filter)
