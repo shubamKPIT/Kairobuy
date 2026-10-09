@@ -62,6 +62,10 @@ const GUTTER = "px-4 sm:px-6 lg:px-8";
 const DESKTOP_PRODUCTS_PER_PAGE = 40;
 const MOBILE_PRODUCTS_PER_PAGE = 30;
 
+/* Brand chips: how many show at first, and how many each "+ More" click adds */
+const BRANDS_INITIAL = 8;
+const BRANDS_STEP = 4;
+
 const typeOptions = [
   { label: "All", value: "all" },
   { label: "Delivery products", value: "delivery" },
@@ -518,6 +522,7 @@ export default function CategoryPageClient({
 
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
+  const [visibleBrandCount, setVisibleBrandCount] = useState(BRANDS_INITIAL);
   const [sortOption, setSortOption] = useState("Newest");
 
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
@@ -548,6 +553,7 @@ export default function CategoryPageClient({
   useEffect(() => {
     setSelectedFilter("All");
     setSelectedBrand("All");
+    setVisibleBrandCount(BRANDS_INITIAL);
     setSortOption("Newest");
     setIsMobileFiltersOpen(false);
     setIsSortOpen(false);
@@ -814,6 +820,12 @@ export default function CategoryPageClient({
 
   const shouldShowBrands = !subcategory && brands.length > 0;
 
+  // Brand chips: limited list with "+ More" (adds one more line) / "Show less"
+  const visibleBrands = brands.slice(0, visibleBrandCount);
+  const hasMoreBrands = brands.length > visibleBrandCount;
+  const canShowLessBrands =
+    brands.length > BRANDS_INITIAL && visibleBrandCount >= brands.length;
+
   const scrollToProducts = () =>
     document.getElementById("products")?.scrollIntoView({
       behavior: "smooth",
@@ -984,7 +996,7 @@ export default function CategoryPageClient({
               description="Choose a brand to refine the products shown below."
             />
 
-            <div className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:mt-7 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+            <div className="mt-5 flex flex-wrap gap-2 sm:mt-7 sm:gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -996,7 +1008,7 @@ export default function CategoryPageClient({
                 All brands
               </button>
 
-              {brands.map((brand) => (
+              {visibleBrands.map((brand) => (
                 <button
                   key={brand}
                   type="button"
@@ -1009,6 +1021,28 @@ export default function CategoryPageClient({
                   {brand}
                 </button>
               ))}
+
+              {hasMoreBrands && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleBrandCount((count) => count + BRANDS_STEP)
+                  }
+                  className={brandChip(false)}
+                >
+                  + More ({brands.length - visibleBrandCount})
+                </button>
+              )}
+
+              {canShowLessBrands && (
+                <button
+                  type="button"
+                  onClick={() => setVisibleBrandCount(BRANDS_INITIAL)}
+                  className={brandChip(false)}
+                >
+                  Show less
+                </button>
+              )}
             </div>
           </div>
         </section>
