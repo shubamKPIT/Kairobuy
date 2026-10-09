@@ -527,7 +527,7 @@ export default function ProductDetailsPage() {
                   href={product.externalUrl}
                   target="_blank"
                   rel="nofollow sponsored noopener noreferrer"
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-zinc-900 text-sm font-medium text-white transition hover:bg-black"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-amber-600 text-sm font-medium text-white transition hover:bg-amber-700"
                 >
                   {externalButtonText}
                   <span aria-hidden="true">↗</span>
@@ -610,91 +610,93 @@ export default function ProductDetailsPage() {
               )}
             </div>
 
-            {/* Delivery Options Accordion & Badges */}
-            <div className="mt-8 rounded-2xl border border-zinc-200/80 bg-[#F9F9F9] p-4 sm:p-5">
-              <button
-                type="button"
-                onClick={() => setIsDeliveryOpen((prev) => !prev)}
-                className="flex w-full items-center justify-between text-left text-sm font-semibold text-zinc-900"
-              >
-                <span className="text-amber-700">Delivery Options</span>
-                {isDeliveryOpen ? (
-                  <FiChevronUp size={18} className="text-zinc-500" />
-                ) : (
-                  <FiChevronDown size={18} className="text-zinc-500" />
-                )}
-              </button>
+            {/* Delivery Options Accordion & Badges (hidden for affiliate/external products) */}
+            {!isExternalProduct && (
+              <div className="mt-8 rounded-2xl border border-zinc-200/80 bg-[#F9F9F9] p-4 sm:p-5">
+                <button
+                  type="button"
+                  onClick={() => setIsDeliveryOpen((prev) => !prev)}
+                  className="flex w-full items-center justify-between text-left text-sm font-semibold text-zinc-900"
+                >
+                  <span className="text-amber-700">Delivery Options</span>
+                  {isDeliveryOpen ? (
+                    <FiChevronUp size={18} className="text-zinc-500" />
+                  ) : (
+                    <FiChevronDown size={18} className="text-zinc-500" />
+                  )}
+                </button>
 
-              {isDeliveryOpen && (
-                <div className="mt-4 space-y-4">
-                  <DeliveryCheck product={product} />
+                {isDeliveryOpen && (
+                  <div className="mt-4 space-y-4">
+                    <DeliveryCheck product={product} />
 
-                  <div className="grid grid-cols-1 gap-3 pt-2 min-[380px]:grid-cols-2">
-                    {/* Discount */}
-                    <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                        <FiPercent size={14} />
+                    <div className="grid grid-cols-1 gap-3 pt-2 min-[380px]:grid-cols-2">
+                      {/* Discount */}
+                      <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                          <FiPercent size={14} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-emerald-600/80">
+                            Discount
+                          </p>
+                          <p className="text-xs font-semibold text-emerald-700">
+                            {hasDiscount
+                              ? `Disc ${discountPercentage}%`
+                              : "Seasonal Offers"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-emerald-600/80">
-                          Discount
-                        </p>
-                        <p className="text-xs font-semibold text-emerald-700">
-                          {hasDiscount
-                            ? `Disc ${discountPercentage}%`
-                            : "Seasonal Offers"}
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Payment */}
-                    <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-sky-50 text-sky-600">
-                        <FiCreditCard size={14} />
+                      {/* Payment */}
+                      <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-sky-50 text-sky-600">
+                          <FiCreditCard size={14} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-sky-600/80">
+                            Payment
+                          </p>
+                          <p className="text-xs font-semibold text-sky-700">
+                            Cash on Delivery/Online Payment
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-sky-600/80">
-                          Payment
-                        </p>
-                        <p className="text-xs font-semibold text-sky-700">
-                          Cash on Delivery/Online Payment
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Delivery Time */}
-                    <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-50 text-amber-600">
-                        <FiTruck size={14} />
+                      {/* Delivery Time */}
+                      <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-50 text-amber-600">
+                          <FiTruck size={14} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-amber-600/80">
+                            Delivery Time
+                          </p>
+                          <p className="text-xs font-semibold text-amber-700">
+                            5-7 Working Days
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-amber-600/80">
-                          Delivery Time
-                        </p>
-                        <p className="text-xs font-semibold text-amber-700">
-                          5-7 Working Days
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Return */}
-                    <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-violet-50 text-violet-600">
-                        <FiRotateCcw size={14} />
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-violet-600/80">
-                          Return & Warranty
-                        </p>
-                        <p className="text-xs font-semibold text-violet-700">
-                          7 Days Easy Return
-                        </p>
+                      {/* Return */}
+                      <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-zinc-100">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-violet-50 text-violet-600">
+                          <FiRotateCcw size={14} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-violet-600/80">
+                            Return & Warranty
+                          </p>
+                          <p className="text-xs font-semibold text-violet-700">
+                            7 Days Easy Return
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* About this item (Highlights) */}
             {highlights.length > 0 && (
@@ -745,84 +747,87 @@ export default function ProductDetailsPage() {
         </div>
 
         {/* Divider */}
-        <hr className="my-10 border-zinc-200 sm:my-16" />
+        {/* <hr className="my-10 border-zinc-200 sm:my-16" /> */}
 
-        {/* Rating & Reviews Section */}
-        <section id="reviews" className="w-full min-w-0 space-y-8">
-          <div className="grid w-full min-w-0 gap-8 md:grid-cols-12 md:items-center">
-            {/* Rating breakdown */}
-            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6 md:col-span-6">
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-light tracking-tighter  sm:text-7xl">
-                  {Number(product.rating || 4.5).toFixed(1)}
-                </span>
-                <span className="text-xl font-medium text-zinc-400">/5</span>
-              </div>
+        {/* Rating & Reviews Section (hidden for affiliate/external products) */}
+        {!isExternalProduct && (
+          <section id="reviews" className="w-full min-w-0 space-y-8">
+            <div className="grid w-full min-w-0 gap-8 md:grid-cols-12 md:items-center">
+              {/* Rating breakdown */}
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6 md:col-span-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-light tracking-tighter  sm:text-7xl">
+                    {Number(product.rating || 4.5).toFixed(1)}
+                  </span>
+                  <span className="text-xl font-medium text-zinc-400">/5</span>
+                </div>
 
-              <div className="w-full min-w-0 max-w-xs flex-1 space-y-1.5">
-                {[5, 4, 3, 2, 1].map((starNum) => (
-                  <div
-                    key={starNum}
-                    className="flex min-w-0 items-center gap-2 text-xs text-zinc-500"
-                  >
-                    <span className="flex items-center gap-0.5 w-6">
-                      <FiStar
-                        size={11}
-                        className="fill-amber-500 text-amber-400"
-                      />
-                      <span>{starNum}</span>
-                    </span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
-                      <div
-                        className={`h-full rounded-full bg-amber-400 ${
-                          starNum === 5
-                            ? "w-4/5"
-                            : starNum === 4
-                              ? "w-2/5"
-                              : "w-1/12"
-                        }`}
-                      />
+                <div className="w-full min-w-0 max-w-xs flex-1 space-y-1.5">
+                  {[5, 4, 3, 2, 1].map((starNum) => (
+                    <div
+                      key={starNum}
+                      className="flex min-w-0 items-center gap-2 text-xs text-zinc-500"
+                    >
+                      <span className="flex items-center gap-0.5 w-6">
+                        <FiStar
+                          size={11}
+                          className="fill-amber-500 text-amber-400"
+                        />
+                        <span>{starNum}</span>
+                      </span>
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
+                        <div
+                          className={`h-full rounded-full bg-amber-400 ${
+                            starNum === 5
+                              ? "w-4/5"
+                              : starNum === 4
+                                ? "w-2/5"
+                                : "w-1/12"
+                          }`}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-                <p className="text-xs text-zinc-400 pt-1">
-                  ({Number(product.reviewCount || 50)} Customer Reviews)
+                  ))}
+                  <p className="text-xs text-zinc-400 pt-1">
+                    ({Number(product.reviewCount || 50)} Customer Reviews)
+                  </p>
+                </div>
+              </div>
+
+              {/* Review This Product Box */}
+              <div className="flex flex-col items-start rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-4 sm:p-6 md:col-span-6 md:items-end md:text-right">
+                <h3 className="text-base font-semibold text-zinc-900">
+                  Review this product
+                </h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Share your thoughts and impressions with other fragrance
+                  lovers.
                 </p>
+                <a
+                  href="#reviews"
+                  className="mt-4 inline-flex items-center rounded-full border border-zinc-900 px-5 py-2 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white"
+                >
+                  Write a customer review
+                </a>
               </div>
             </div>
 
-            {/* Review This Product Box */}
-            <div className="flex flex-col items-start rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-4 sm:p-6 md:col-span-6 md:items-end md:text-right">
-              <h3 className="text-base font-semibold text-zinc-900">
-                Review this product
-              </h3>
-              <p className="mt-1 text-xs text-zinc-500">
-                Share your thoughts and impressions with other fragrance lovers.
-              </p>
-              <a
-                href="#reviews"
-                className="mt-4 inline-flex items-center rounded-full border border-zinc-900 px-5 py-2 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white"
-              >
-                Write a customer review
-              </a>
-            </div>
-          </div>
-
-          <ProductReviews
-            productId={product._id}
-            onSummaryChange={(summary) =>
-              setProduct((current) =>
-                current
-                  ? {
-                      ...current,
-                      rating: summary.average,
-                      reviewCount: summary.count,
-                    }
-                  : current,
-              )
-            }
-          />
-        </section>
+            <ProductReviews
+              productId={product._id}
+              onSummaryChange={(summary) =>
+                setProduct((current) =>
+                  current
+                    ? {
+                        ...current,
+                        rating: summary.average,
+                        reviewCount: summary.count,
+                      }
+                    : current,
+                )
+              }
+            />
+          </section>
+        )}
 
         {/* Similar Products */}
         <section className="space-y-6">

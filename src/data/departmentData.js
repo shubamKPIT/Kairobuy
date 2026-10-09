@@ -259,18 +259,18 @@ export const departmentData = {
         // image: "https://images.pexels.com/photos/15735139/pexels-photo-15735139.jpeg",
         description: "Sunglasses, eyewear, and protective accessories.",
       },
-      {
-        title: "Travel Accessories",
-        slug: "travel-accessories",
-        // image: "https://images.pexels.com/photos/36492573/pexels-photo-36492573.jpeg",
-        description: "Travel organisers, pouches, luggage accessories, and more.",
-      },
-      {
-        title: "Bags",
-        slug: "bags",
-        // image: "https://images.pexels.com/photos/36931056/pexels-photo-36931056.jpeg",
-        description: "Sling bags, laptop bags, backpacks, and carry essentials.",
-      },
+      // {
+      //   title: "Travel Accessories",
+      //   slug: "travel-accessories",
+      //   // image: "https://images.pexels.com/photos/36492573/pexels-photo-36492573.jpeg",
+      //   description: "Travel organisers, pouches, luggage accessories, and more.",
+      // },
+      // {
+      //   title: "Bags",
+      //   slug: "bags",
+      //   // image: "https://images.pexels.com/photos/36931056/pexels-photo-36931056.jpeg",
+      //   description: "Sling bags, laptop bags, backpacks, and carry essentials.",
+      // },
     ],
   },
 };

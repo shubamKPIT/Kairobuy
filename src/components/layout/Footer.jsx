@@ -100,9 +100,7 @@ export default function Footer() {
         <div className="grid grid-cols-3 gap-4 text-center">
           {/* Shop */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase">
-              Shop
-            </h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase">Shop</h3>
 
             <ul className="space-y-2 text-xs text-gray-400">
               {shopLinks.map((link) => (
@@ -120,9 +118,7 @@ export default function Footer() {
 
           {/* Help */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase">
-              Help
-            </h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase">Help</h3>
 
             <ul className="space-y-2 text-xs text-gray-400">
               {helpLinks.map((link) => (
@@ -131,9 +127,7 @@ export default function Footer() {
                     href={link.href}
                     className="transition hover:text-white"
                   >
-                    {link.label === "Order Tracking"
-                      ? "Tracking"
-                      : link.label}
+                    {link.label === "Order Tracking" ? "Tracking" : link.label}
                   </Link>
                 </li>
               ))}
@@ -142,9 +136,7 @@ export default function Footer() {
 
           {/* Social */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase">
-              Follow
-            </h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase">Follow</h3>
 
             <ul className="space-y-2 text-left text-xs text-gray-400">
               {socialLinks.map((social) => {
@@ -168,23 +160,21 @@ export default function Footer() {
 
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
           <Link
-            href="/privacy-policy"
+            href="/Affiliate-disclosure"
             className="transition hover:text-white"
           >
+            Affiliate Disclosure
+          </Link>
+
+          <Link href="/privacy-policy" className="transition hover:text-white">
             Privacy Policy
           </Link>
 
-          <Link
-            href="/terms"
-            className="transition hover:text-white"
-          >
+          <Link href="/terms" className="transition hover:text-white">
             Terms
           </Link>
 
-          <Link
-            href="/cookies"
-            className="transition hover:text-white"
-          >
+          <Link href="/cookies" className="transition hover:text-white">
             Cookies
           </Link>
         </div>
@@ -199,9 +189,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-10 border-b border-gray-700 pb-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="flex flex-col">
-            <h2 className="mb-4 text-2xl font-bold uppercase">
-              Kairobuy
-            </h2>
+            <h2 className="mb-4 text-2xl font-bold uppercase">Kairobuy</h2>
 
             <p className="max-w-sm text-sm leading-relaxed text-gray-400">
               Fashion, footwear, home essentials, accessories, and curated
@@ -268,10 +256,7 @@ export default function Footer() {
                 const Icon = social.icon;
 
                 return (
-                  <li
-                    key={social.label}
-                    className="flex items-center gap-2"
-                  >
+                  <li key={social.label} className="flex items-center gap-2">
                     <Icon size={18} />
                     {social.label}
                   </li>
@@ -289,23 +274,23 @@ export default function Footer() {
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6">
             <Link
+              href="/Affiliate-disclosure"
+              className="transition hover:text-white"
+            >
+              Affiliate Disclosure
+            </Link>
+            <Link
               href="/privacy-policy"
               className="transition hover:text-white"
             >
               Privacy Policy
             </Link>
 
-            <Link
-              href="/terms"
-              className="transition hover:text-white"
-            >
+            <Link href="/terms" className="transition hover:text-white">
               Terms
             </Link>
 
-            <Link
-              href="/cookies"
-              className="transition hover:text-white"
-            >
+            <Link href="/cookies" className="transition hover:text-white">
               Cookies
             </Link>
           </div>

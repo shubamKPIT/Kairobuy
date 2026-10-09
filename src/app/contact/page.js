@@ -3,7 +3,7 @@
 import HelpPageLayout from "@/components/site/HelpPageLayout";
 import { FiMail, FiMessageCircle, FiPhone, FiSend } from "react-icons/fi";
 
-const SUPPORT_EMAIL = "support@kairobuy.example";
+const SUPPORT_EMAIL = "support@kairobuy.com";
 
 const orderMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
   "Order query",
