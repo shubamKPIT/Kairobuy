@@ -1,44 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import HelpPageLayout from "@/components/site/HelpPageLayout";
-import {
-  FiMail,
-  FiMessageCircle,
-  FiPhone,
-  FiSend,
-} from "react-icons/fi";
+import { FiMail, FiMessageCircle, FiPhone, FiSend } from "react-icons/fi";
+
+const SUPPORT_EMAIL = "support@kairobuy.example";
+
+const orderMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+  "Order query",
+)}&body=${encodeURIComponent(
+  "Hi KairoBuy team,\n\nOrder number: \nMy question: \n\nThanks,",
+)}`;
 
 export default function ContactPage() {
-  const [message, setMessage] = useState("");
-
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    setMessage(
-      "Your message form is ready. Connect this form to your support email or support-ticket API next.",
-    );
-
-    event.currentTarget.reset();
-  }
-
   return (
     <HelpPageLayout
       title="Contact Us"
-      description="Need help with a product, order, payment, return, or delivery question? Send us a message."
+      description="Need help with a product, order, payment, return, or delivery question? Send us an email and we'll get back to you."
     >
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 transition hover:border-zinc-950"
+        >
           <FiMail size={20} className="text-amber-700" />
           <h2 className="mt-3 text-sm font-black text-zinc-950">
             Email support
           </h2>
-          <p className="mt-2 text-sm text-zinc-600">
-            support@kairobuy.example
-          </p>
-        </div>
+          <p className="mt-2 text-sm text-zinc-600">{SUPPORT_EMAIL}</p>
+        </a>
 
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+        <a
+          href="tel:+910000000000"
+          className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 transition hover:border-zinc-950"
+        >
           <FiPhone size={20} className="text-amber-700" />
           <h2 className="mt-3 text-sm font-black text-zinc-950">
             Phone support
@@ -46,9 +40,12 @@ export default function ContactPage() {
           <p className="mt-2 text-sm text-zinc-600">
             Add your support number
           </p>
-        </div>
+        </a>
 
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+        <a
+          href={orderMailto}
+          className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 transition hover:border-zinc-950"
+        >
           <FiMessageCircle size={20} className="text-amber-700" />
           <h2 className="mt-3 text-sm font-black text-zinc-950">
             Order support
@@ -56,58 +53,38 @@ export default function ContactPage() {
           <p className="mt-2 text-sm text-zinc-600">
             Include your order number.
           </p>
-        </div>
+        </a>
       </section>
 
       <section>
         <h2 className="text-xl font-black text-zinc-950">
-          Send a message
+          Have a question? Email us
         </h2>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <input
-              required
-              type="text"
-              placeholder="Your name"
-              className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-100"
-            />
-
-            <input
-              required
-              type="email"
-              placeholder="Email address"
-              className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-100"
-            />
-          </div>
-
-          <input
-            type="text"
-            placeholder="Order number, if applicable"
-            className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-100"
-          />
-
-          <textarea
-            required
-            rows={6}
-            placeholder="How can we help?"
-            className="w-full resize-y rounded-xl border border-zinc-300 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-100"
-          />
-
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
+        <p className="mt-3 text-sm text-zinc-600">
+          Write to us at{" "}
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="font-bold text-zinc-950 underline"
           >
-            <FiSend size={16} />
-            Send message
-          </button>
-        </form>
+            {SUPPORT_EMAIL}
+          </a>
+          . To help us resolve your query faster, please include:
+        </p>
 
-        {message && (
-          <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-            {message}
-          </p>
-        )}
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-600">
+          <li>Your name and the email address used on your order</li>
+          <li>Your order number, if your question is about an order</li>
+          <li>A clear description of the issue, with photos if relevant</li>
+        </ul>
+
+        <a
+          href={orderMailto}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
+        >
+          <FiSend size={16} />
+          Email us
+        </a>
       </section>
     </HelpPageLayout>
   );

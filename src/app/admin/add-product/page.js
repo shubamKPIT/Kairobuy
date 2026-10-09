@@ -19,6 +19,17 @@ import {
   uploadStoreMedia,
 } from "../../../services/mediaService";
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const AMAZON_HOSTNAMES = [
+  "amazon.in",
+  "www.amazon.in",
+  "amzn.in",
+  "amzn.to",
+  "link.amazon",
+];
+
 const initialForm = {
   title: "",
   slug: "",
@@ -91,14 +102,20 @@ function isValidExternalUrl(value) {
 
 function isAmazonUrl(value) {
   try {
-    const hostname = new URL(value).hostname.toLowerCase();
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
 
-    return ["amazon.in", "www.amazon.in", "amzn.in", "amzn.to"].includes(
-      hostname,
+    return (
+      (url.protocol === "https:" || url.protocol === "http:") &&
+      AMAZON_HOSTNAMES.includes(hostname)
     );
   } catch {
     return false;
   }
+}
+
+function isValidAsin(value) {
+  return /^[A-Z0-9]{10}$/.test(value);
 }
 
 export default function AddProductPage() {
@@ -170,6 +187,17 @@ export default function AddProductPage() {
       });
     };
   }, [selectedImages]);
+
+  // Auto-hide the success message after a few seconds
+  useEffect(() => {
+    if (!success) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => setSuccess(""), 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [success]);
 
   const allImagePreviewItems = useMemo(() => {
     const urlItems = externalImageList.map((imageUrl, index) => ({
@@ -322,17 +350,41 @@ export default function AddProductPage() {
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const wrongTypeFiles = files.filter(
+      (file) => !ALLOWED_IMAGE_TYPES.includes(file.type),
+    );
 
-    const validFiles = files.filter((file) => allowedTypes.includes(file.type));
+    const oversizedFiles = files.filter(
+      (file) =>
+        ALLOWED_IMAGE_TYPES.includes(file.type) && file.size > MAX_IMAGE_SIZE,
+    );
 
-    if (validFiles.length !== files.length) {
-      setError("Only JPG, PNG, and WebP image files are allowed.");
-    } else {
-      setError("");
+    const validFiles = files.filter(
+      (file) =>
+        ALLOWED_IMAGE_TYPES.includes(file.type) && file.size <= MAX_IMAGE_SIZE,
+    );
+
+    const messages = [];
+
+    if (wrongTypeFiles.length) {
+      messages.push("Only JPG, PNG, and WebP image files are allowed.");
     }
 
-    setSelectedImages((previousImages) => [...previousImages, ...validFiles]);
+    if (oversizedFiles.length) {
+      const names = oversizedFiles
+        .map((file) => `${file.name} (${formatFileSize(file.size)})`)
+        .join(", ");
+
+      messages.push(
+        `These files exceed the ${formatFileSize(MAX_IMAGE_SIZE)} limit: ${names}.`,
+      );
+    }
+
+    setError(messages.join(" "));
+
+    if (validFiles.length) {
+      setSelectedImages((previousImages) => [...previousImages, ...validFiles]);
+    }
 
     event.target.value = "";
   }
@@ -428,6 +480,7 @@ export default function AddProductPage() {
     const title = form.title.trim();
     const slug = createSlug(form.slug || form.title);
     const externalUrl = form.externalUrl.trim();
+    const amazonAsin = form.amazonAsin.trim().toUpperCase();
 
     if (!title) {
       setError("Please enter a product title.");
@@ -468,7 +521,14 @@ export default function AddProductPage() {
 
     if (isAmazon && !isAmazonUrl(externalUrl)) {
       setError(
-        "For an Amazon product, use an Amazon.in, amzn.in, or amzn.to affiliate link.",
+        "For an Amazon product, use an Amazon.in, amzn.in, amzn.to, or link.amazon affiliate link.",
+      );
+      return;
+    }
+
+    if (isAmazon && amazonAsin && !isValidAsin(amazonAsin)) {
+      setError(
+        "The Amazon ASIN must be exactly 10 letters or numbers (for example, B0ABCDE123), or left empty.",
       );
       return;
     }
@@ -586,7 +646,7 @@ export default function AddProductPage() {
         },
 
         amazon: {
-          asin: isAmazon ? form.amazonAsin.trim().toUpperCase() : "",
+          asin: isAmazon ? amazonAsin : "",
         },
       };
 
@@ -1038,9 +1098,13 @@ export default function AddProductPage() {
                   onChange={(event) =>
                     updateField("externalUrl", event.target.value)
                   }
-                  placeholder="https://www.amazon.in/dp/PRODUCT-ASIN?tag=yourtag-21"
+                  placeholder="https://www.amazon.in/dp/PRODUCT-ASIN?tag=yourtag-21 or https://link.amazon/..."
                   className="w-full rounded-lg border border-orange-300 bg-white px-3 py-2.5 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
                 />
+
+                <p className="mt-2 text-xs leading-5 text-orange-900/70">
+                  Accepted: amazon.in, amzn.in, amzn.to, and link.amazon links.
+                </p>
               </div>
 
               <div className="mt-4">
@@ -1061,6 +1125,11 @@ export default function AddProductPage() {
                   placeholder="Example: B0ABCDE123"
                   className="w-full rounded-lg border border-orange-300 bg-white px-3 py-2.5 uppercase outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
                 />
+
+                <p className="mt-2 text-xs leading-5 text-orange-900/70">
+                  Optional. Short links don&apos;t contain the ASIN, so enter it
+                  manually if you need it. Must be 10 letters or numbers.
+                </p>
               </div>
             </section>
           )}
