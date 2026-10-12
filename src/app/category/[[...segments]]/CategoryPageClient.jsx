@@ -66,6 +66,10 @@ const MOBILE_PRODUCTS_PER_PAGE = 30;
 const BRANDS_INITIAL = 8;
 const BRANDS_STEP = 4;
 
+/* Sidebar sticky behaviour: height of your fixed navbar and gap under the last filter */
+const HEADER_OFFSET = 80;
+const SIDEBAR_BOTTOM_GAP = 16;
+
 const typeOptions = [
   { label: "All", value: "all" },
   { label: "Delivery products", value: "delivery" },
@@ -532,6 +536,10 @@ export default function CategoryPageClient({
     DESKTOP_PRODUCTS_PER_PAGE,
   );
 
+  /* Sidebar: scrolls with the page, then sticks once its last filter reaches the screen bottom */
+  const sidebarRef = useRef(null);
+  const [sidebarTop, setSidebarTop] = useState(HEADER_OFFSET);
+
   useEffect(() => {
     const updateProductsPerPage = () => {
       setProductsPerPage(
@@ -549,6 +557,40 @@ export default function CategoryPageClient({
       window.removeEventListener("resize", updateProductsPerPage);
     };
   }, []);
+
+  useEffect(() => {
+    const element = sidebarRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const updateSidebarTop = () => {
+      const sidebarHeight = element.offsetHeight;
+      const viewportHeight = window.innerHeight;
+
+      // Taller than the screen -> negative top, so it sticks only when its
+      // bottom edge reaches the bottom of the screen.
+      // Shorter than the screen -> just stick under the header.
+      setSidebarTop(
+        Math.min(
+          HEADER_OFFSET,
+          viewportHeight - sidebarHeight - SIDEBAR_BOTTOM_GAP,
+        ),
+      );
+    };
+
+    updateSidebarTop();
+
+    const observer = new ResizeObserver(updateSidebarTop);
+    observer.observe(element);
+    window.addEventListener("resize", updateSidebarTop);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateSidebarTop);
+    };
+  }, [isValidRoute]);
 
   useEffect(() => {
     setSelectedFilter("All");
@@ -1126,34 +1168,40 @@ export default function CategoryPageClient({
         )}
 
         <div className="mx-auto flex max-w-[1600px]">
-          <aside className="sticky top-0 hidden h-screen w-80 shrink-0 overflow-y-auto border-r border-zinc-200 bg-white p-7 lg:block">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-full bg-zinc-100">
-                <FiSliders size={18} />
+          <aside className="hidden w-80 shrink-0 border-r border-zinc-200 bg-white lg:block">
+            <div
+              ref={sidebarRef}
+              className="sticky p-7"
+              style={{ top: sidebarTop }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-full bg-zinc-100">
+                  <FiSliders size={18} />
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-700">
+                    Refine results
+                  </p>
+
+                  <h2 className="text-2xl font-black tracking-tight text-zinc-950">
+                    Filters
+                  </h2>
+                </div>
               </div>
 
-              <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-700">
-                  Refine results
-                </p>
-
-                <h2 className="text-2xl font-black tracking-tight text-zinc-950">
-                  Filters
-                </h2>
+              <div className="mt-8">
+                <FilterContent
+                  filters={productTypeFilters}
+                  selectedFilter={selectedFilter}
+                  setSelectedFilter={setSelectedFilter}
+                  selectedPrice={selectedPrice}
+                  onPriceChange={handlePriceChange}
+                  selectedType={selectedType}
+                  onTypeChange={handleTypeChange}
+                  filterTitle={filterTitle}
+                />
               </div>
-            </div>
-
-            <div className="mt-8">
-              <FilterContent
-                filters={productTypeFilters}
-                selectedFilter={selectedFilter}
-                setSelectedFilter={setSelectedFilter}
-                selectedPrice={selectedPrice}
-                onPriceChange={handlePriceChange}
-                selectedType={selectedType}
-                onTypeChange={handleTypeChange}
-                filterTitle={filterTitle}
-              />
             </div>
           </aside>
 

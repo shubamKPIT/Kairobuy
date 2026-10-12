@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Header from "./Header";
+import Footer from "./Footer";
 
 export default function StorefrontShell({ children }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function StorefrontShell({ children }) {
     <>
       <Header />
       <main>{children}</main>
+      <Footer />
     </>
   );
 }

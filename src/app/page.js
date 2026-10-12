@@ -8,7 +8,6 @@ import Hero from "../components/home/Hero";
 import CategoryShowcase from "../components/home/CategoryShowcase";
 import NewDrops from "../components/home/NewDrops";
 import LifestyleVideo from "@/components/home/LifestyleVideo";
-import Footer from "@/components/layout/Footer";
 import HomePromoBanners from "@/components/home/HomePromoBanners";
 import ShopByBudget from "@/components/home/ShopByBudget";
 import SmallAnimatedpromo from "@/components/home/SmallAnimatedPromo";
@@ -29,7 +28,6 @@ export default function HomePage() {
       <ShopByBudget />
       <Testimonials />
       <LifestyleVideo />
-      <Footer />
     </>
   );
 }
