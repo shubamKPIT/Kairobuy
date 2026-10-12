@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiHeart, FiShoppingBag, FiStar } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
@@ -30,6 +31,7 @@ export default function ProductCard({ product }) {
 
   const name = product.name || product.title || "Kairobuy product";
   const brand = product.brand || product.category || "Kairobuy";
+  const productHref = `/product/${product._id}`;
 
   const isAmazon = product.source === "AMAZON";
   const isExternal = product.purchaseMode === "EXTERNAL_LINK" || isAmazon;
@@ -92,6 +94,7 @@ export default function ProductCard({ product }) {
   }, [hovered, images.length]);
 
   const handleWishlist = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     if (!user) {
       window.alert("Please login to add products to your wishlist.");
@@ -100,8 +103,6 @@ export default function ProductCard({ product }) {
     }
     toggleWishlist(product);
   };
-
-  const openDetails = () => router.push(`/product/${product._id}`);
 
   const priceRow = !isExternal ? (
     <p className="flex items-baseline gap-1.5 text-sm">
@@ -123,7 +124,6 @@ export default function ProductCard({ product }) {
 
   return (
     <article
-      onClick={openDetails}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
         setHovered(false);
@@ -131,6 +131,14 @@ export default function ProductCard({ product }) {
       }}
       className="group relative flex cursor-pointer flex-col bg-white transition-shadow duration-200 hover:shadow-[0_2px_16px_4px_rgba(40,44,63,0.07)]"
     >
+      {/* Real crawlable link covering the whole card.
+          Buttons below use z-20 so they stay clickable above it. */}
+      <Link
+        href={productHref}
+        aria-label={`View ${name}`}
+        className="absolute inset-0 z-10"
+      />
+
       {/* Image */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-100">
         <ProductImage
@@ -173,7 +181,7 @@ export default function ProductCard({ product }) {
           type="button"
           onClick={handleWishlist}
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
-          className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-white/90 md:hidden"
+          className="absolute right-2 top-2 z-20 grid size-8 place-items-center rounded-full bg-white/90 md:hidden"
         >
           <FiHeart
             size={16}
@@ -205,10 +213,11 @@ export default function ProductCard({ product }) {
                   type="button"
                   aria-label={`Show image ${i + 1}`}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setActiveImage(i);
                   }}
-                  className={`size-1.5 rounded-full ${
+                  className={`relative z-20 size-1.5 rounded-full ${
                     i === activeImage ? "bg-pink-500" : "bg-zinc-300"
                   }`}
                 />
@@ -222,7 +231,7 @@ export default function ProductCard({ product }) {
               target="_blank"
               rel="nofollow sponsored noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex h-9 items-center justify-center gap-2 rounded-sm bg-orange-500 text-xs font-bold text-white hover:bg-orange-600"
+              className="relative z-20 flex h-9 items-center justify-center gap-2 rounded-sm bg-orange-500 text-xs font-bold text-white hover:bg-orange-600"
             >
               <FiShoppingBag size={14} />
               {externalText} ↗
@@ -231,7 +240,7 @@ export default function ProductCard({ product }) {
             <button
               type="button"
               onClick={handleWishlist}
-              className="flex h-9 items-center justify-center gap-2 rounded-sm border border-zinc-300 text-xs font-bold uppercase tracking-wide text-zinc-800 hover:border-zinc-800"
+              className="relative z-20 flex h-9 items-center justify-center gap-2 rounded-sm border border-zinc-300 text-xs font-bold uppercase tracking-wide text-zinc-800 hover:border-zinc-800"
             >
               <FiHeart
                 size={16}

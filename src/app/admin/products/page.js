@@ -343,7 +343,81 @@ function EditProductModal({
                 className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
               />
             </label>
+
+            <label className="block sm:col-span-2">
+              <span className="mb-2 block text-sm font-bold text-zinc-700">
+                Product slug
+              </span>
+
+              <input
+                type="text"
+                name="slug"
+                value={product.slug || ""}
+                onChange={(event) =>
+                  onChange({
+                    target: {
+                      name: "slug",
+                      value: event.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]+/g, "-"),
+                    },
+                  })
+                }
+                onBlur={(event) =>
+                  onChange({
+                    target: {
+                      name: "slug",
+                      value: createSlug(event.target.value),
+                    },
+                  })
+                }
+                placeholder="oversized-cotton-t-shirt"
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
+              />
+
+              <span className="mt-1 block text-xs text-zinc-500">
+                Must be unique. Your product URLs use the product ID, so
+                changing this does not break existing links.
+              </span>
+            </label>
           </div>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-zinc-700">
+              Short description
+            </span>
+
+            <input
+              type="text"
+              name="shortDescription"
+              value={product.shortDescription || ""}
+              onChange={onChange}
+              maxLength={300}
+              placeholder="A short one-line product summary"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
+            />
+
+            <span className="mt-1 block text-xs text-zinc-500">
+              {(product.shortDescription || "").length}/300. Also used as the
+              Google search description.
+            </span>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-zinc-700">
+              Full description
+            </span>
+
+            <textarea
+              name="description"
+              rows={6}
+              value={product.description || ""}
+              onChange={onChange}
+              placeholder="Write the complete product description..."
+              className="w-full resize-y rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition focus:border-zinc-950 focus:bg-white"
+            />
+          </label>
+
           <ProductDetailsEditor
             contextLabel={
               product.department && product.department !== "ALL"
@@ -1492,6 +1566,9 @@ export default function AdminProductsPage() {
       );
       const updatedProduct = {
         ...editingProduct,
+
+        // The slug must never be empty (the database requires a unique slug)
+        slug: createSlug(editingProduct.slug || editingProduct.name),
 
         image: galleryImages[0],
         images: galleryImages,

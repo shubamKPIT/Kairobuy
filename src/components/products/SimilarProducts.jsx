@@ -33,7 +33,7 @@ function SimilarCard({ item }) {
   return (
     <Link
       href={`${PRODUCT_PATH}/${item._id}`}
-      className="group w-44 shrink-0 snap-start sm:w-52"
+      className="group w-full min-w-0 shrink-0 snap-start sm:w-52"
     >
       <div className="relative aspect-square overflow-hidden rounded-lg bg-zinc-100">
         {image ? (
@@ -41,7 +41,7 @@ function SimilarCard({ item }) {
             src={image}
             alt={item.name}
             fill
-            sizes="(min-width: 640px) 208px, 176px"
+            sizes="(min-width: 640px) 208px, 50vw"
             loading="lazy"
             className="h-full w-full object-cover"
           />
@@ -158,13 +158,13 @@ export default function SimilarProducts({ product }) {
 
       <div
         ref={scroller}
-        className="mt-5 flex w-full min-w-0 max-w-full snap-x gap-4 overflow-x-auto overflow-y-hidden pb-3 [scrollbar-width:thin]"
+        className="mt-5 grid w-full min-w-0 max-w-full grid-cols-2 gap-4 pb-3 sm:flex sm:snap-x sm:overflow-x-auto sm:overflow-y-hidden [scrollbar-width:thin]"
       >
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="w-44 shrink-0 animate-pulse sm:w-52"
+                className="w-full min-w-0 shrink-0 animate-pulse sm:w-52"
               >
                 <div className="aspect-square rounded-lg bg-zinc-200" />
                 <div className="mt-2 h-4 w-4/5 rounded bg-zinc-200" />
