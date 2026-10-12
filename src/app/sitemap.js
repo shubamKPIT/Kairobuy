@@ -21,7 +21,7 @@ export default async function sitemap() {
     { path: "/privacy-policy", priority: 0.2, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
     { path: "/cookies", priority: 0.2, changeFrequency: "yearly" },
-    { path: "/affiliate-disclosure", priority: 0.2, changeFrequency: "yearly" },
+    // { path: "/affiliate-disclosure", priority: 0.2, changeFrequency: "yearly" },
   ].map(({ path, priority, changeFrequency }) => ({
     url: `${baseUrl}${path}`,
     lastModified: now,
