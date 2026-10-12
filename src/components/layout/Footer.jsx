@@ -159,12 +159,12 @@ export default function Footer() {
         <div className="my-6 border-t border-zinc-800" />
 
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
-          {/* <Link
+          <Link
             href="/affiliate-disclosure"
             className="transition hover:text-white"
           >
             Affiliate Disclosure
-          </Link> */}
+          </Link>
 
           <Link href="/privacy-policy" className="transition hover:text-white">
             Privacy Policy
@@ -273,12 +273,12 @@ export default function Footer() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-            {/* <Link
+            <Link
               href="/affiliate-disclosure"
               className="transition hover:text-white"
             >
               Affiliate Disclosure
-            </Link> */}
+            </Link>
             <Link
               href="/privacy-policy"
               className="transition hover:text-white"
