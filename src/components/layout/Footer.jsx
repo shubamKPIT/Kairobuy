@@ -160,7 +160,7 @@ export default function Footer() {
 
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
           <Link
-            href="/Affiliate-disclosure"
+            href="/affiliate-disclosure"
             className="transition hover:text-white"
           >
             Affiliate Disclosure
@@ -274,7 +274,7 @@ export default function Footer() {
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6">
             <Link
-              href="/Affiliate-disclosure"
+              href="/affiliate-disclosure"
               className="transition hover:text-white"
             >
               Affiliate Disclosure
