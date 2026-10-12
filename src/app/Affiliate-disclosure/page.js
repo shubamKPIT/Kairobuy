@@ -109,7 +109,7 @@ export default function AffiliateDisclosurePage() {
       </div>
 
       <p className="mt-12 border-t border-neutral-200 pt-6 text-base font-medium text-neutral-900">
-        Thank you for supporting Kairobuy!
+        Thank you for Supporting Kairobuy!
       </p>
     </main>
   );
