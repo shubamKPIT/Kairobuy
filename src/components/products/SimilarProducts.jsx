@@ -7,6 +7,7 @@ import { fetchProducts } from "../../services/productService";
 import ProductImage from "./ProductImage";
 
 const PRODUCT_PATH = "/product";
+const MOBILE_LIMIT = 6;
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -22,6 +23,22 @@ function getImage(product) {
   const candidate =
     first || product.image || product.thumbnail || product.imageUrl || "";
   return typeof candidate === "string" ? candidate : candidate?.url || "";
+}
+
+// True below the `sm` breakpoint (640px).
+function useIsMobile(query = "(max-width: 639px)") {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const update = () => setIsMobile(media.matches);
+
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [query]);
+
+  return isMobile;
 }
 
 function SimilarCard({ item }) {
@@ -75,6 +92,10 @@ export default function SimilarProducts({ product }) {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const scroller = useRef(null);
+
+  // Mobile renders only the first 6 cards, so the rest never load
+  const isMobile = useIsMobile();
+  const visibleItems = isMobile ? items.slice(0, MOBILE_LIMIT) : items;
 
   // Same subcategory (and department, when the product has one).
   const subcategory = product.subcategory || product.subCategory || "";
@@ -171,7 +192,7 @@ export default function SimilarProducts({ product }) {
                 <div className="mt-2 h-4 w-1/3 rounded bg-zinc-200" />
               </div>
             ))
-          : items.map((item) => (
+          : visibleItems.map((item) => (
               <SimilarCard key={item._id} item={item} />
             ))}
       </div>

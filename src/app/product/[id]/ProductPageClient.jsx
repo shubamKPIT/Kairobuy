@@ -12,8 +12,10 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiCreditCard,
+  FiEdit3,
   FiHeart,
   FiLock,
+  FiMessageSquare,
   FiMinus,
   FiPercent,
   FiPlus,
@@ -99,8 +101,8 @@ export default function ProductDetailsPage({ initialProduct = null }) {
   const [wishlistMessage, setWishlistMessage] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [sizeError, setSizeError] = useState("");
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
-  const [isDescOpen, setIsDescOpen] = useState(true);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(true);
 
   useEffect(() => {
@@ -131,6 +133,24 @@ export default function ProductDetailsPage({ initialProduct = null }) {
   useEffect(() => {
     setSelectedSize("");
     setSizeError("");
+  }, [id]);
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const toTop = () =>
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    toTop();
+    const raf = requestAnimationFrame(toTop);
+    const timer = setTimeout(toTop, 150);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
   }, [id]);
 
   useEffect(() => {
@@ -320,7 +340,10 @@ export default function ProductDetailsPage({ initialProduct = null }) {
       : [];
 
   return (
-    <main className="min-h-screen w-full max-w-full overflow-x-clip bg-[#FDFDFD] text-zinc-900 pb-24 lg:pb-16 antialiased">
+    <main
+      style={{ overflowAnchor: "none" }}
+      className="min-h-screen w-full max-w-full overflow-x-clip bg-[#FDFDFD] text-zinc-900 pb-24 lg:pb-16 antialiased"
+    >
       <div className="mx-auto w-full max-w-full min-w-0 px-3 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation: < Home / Products */}
         <nav className="flex min-w-0 items-center gap-2 py-4 text-xs text-zinc-500 sm:py-5">
@@ -441,31 +464,6 @@ export default function ProductDetailsPage({ initialProduct = null }) {
                     ? `Only ${totalStock} left in stock`
                     : "In stock"}
               </span>
-            </div>
-
-            {/* Description Accordion */}
-            <div className="mt-6 rounded-2xl border border-zinc-200/80 bg-[#F9F9F9] p-4 sm:p-5">
-              <button
-                type="button"
-                onClick={() => setIsDescOpen((prev) => !prev)}
-                className="flex w-full items-center justify-between text-left text-sm font-semibold text-zinc-900"
-              >
-                <span className="text-amber-700">Description</span>
-                {isDescOpen ? (
-                  <FiChevronUp size={18} className="text-zinc-500" />
-                ) : (
-                  <FiChevronDown size={18} className="text-zinc-500" />
-                )}
-              </button>
-
-              {isDescOpen && (
-                <div className="mt-3 text-xs leading-relaxed text-zinc-600 sm:text-sm">
-                  <p>
-                    {product.description ||
-                      "Crafted with the finest ingredients for an enduring, timeless impression."}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Size Selector */}
@@ -757,74 +755,41 @@ export default function ProductDetailsPage({ initialProduct = null }) {
           </div>
         </div>
 
-        {/* Divider */}
-        {/* <hr className="my-10 border-zinc-200 sm:my-16" /> */}
-
-        {/* Rating & Reviews Section (hidden for affiliate/external products) */}
+        {/* Ratings & Reviews (hidden for affiliate/external products) */}
         {!isExternalProduct && (
-          <section id="reviews" className="w-full min-w-0 space-y-8">
-            <div className="grid w-full min-w-0 gap-8 md:grid-cols-12 md:items-center">
-              {/* Rating breakdown */}
-              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6 md:col-span-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-light tracking-tighter  sm:text-7xl">
-                    {Number(product.rating || 4.5).toFixed(1)}
-                  </span>
-                  <span className="text-xl font-medium text-zinc-400">/5</span>
-                </div>
+          <section id="reviews" className="mt-10 w-full min-w-0 sm:mt-14">
+            {/* Write-a-review prompt. The rating summary and review list live
+                in ProductReviews, so nothing is shown twice. */}
+            <div className="flex w-full min-w-0 flex-col gap-4 rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-amber-50/70 via-white to-zinc-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-7">
+              <div className="flex min-w-0 items-start gap-3.5 sm:items-center sm:gap-4">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-700 sm:h-12 sm:w-12">
+                  <FiMessageSquare size={20} />
+                </span>
 
-                <div className="w-full min-w-0 max-w-xs flex-1 space-y-1.5">
-                  {[5, 4, 3, 2, 1].map((starNum) => (
-                    <div
-                      key={starNum}
-                      className="flex min-w-0 items-center gap-2 text-xs text-zinc-500"
-                    >
-                      <span className="flex items-center gap-0.5 w-6">
-                        <FiStar
-                          size={11}
-                          className="fill-amber-500 text-amber-400"
-                        />
-                        <span>{starNum}</span>
-                      </span>
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
-                        <div
-                          className={`h-full rounded-full bg-amber-400 ${
-                            starNum === 5
-                              ? "w-4/5"
-                              : starNum === 4
-                                ? "w-2/5"
-                                : "w-1/12"
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  <p className="text-xs text-zinc-400 pt-1">
-                    ({Number(product.reviewCount || 50)} Customer Reviews)
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold tracking-tight text-zinc-950 sm:text-lg">
+                    Share your experience
+                  </h2>
+                  <p className="mt-0.5 text-xs leading-relaxed text-zinc-600 sm:text-sm">
+                    Help other shoppers decide with an honest review.
                   </p>
                 </div>
               </div>
 
-              {/* Review This Product Box */}
-              <div className="flex flex-col items-start rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-4 sm:p-6 md:col-span-6 md:items-end md:text-right">
-                <h3 className="text-base font-semibold text-zinc-900">
-                  Review this product
-                </h3>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Share your thoughts and impressions with other fragrance
-                  lovers.
-                </p>
-                <a
-                  href="#reviews"
-                  className="mt-4 inline-flex items-center rounded-full border border-zinc-900 px-5 py-2 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white"
-                >
-                  Write a customer review
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsReviewOpen(true)}
+                className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 text-sm font-medium text-white shadow-sm transition hover:bg-black sm:w-auto"
+              >
+                <FiEdit3 size={15} />
+                Write a review
+              </button>
             </div>
 
             <ProductReviews
               productId={product._id}
+              isFormOpen={isReviewOpen}
+              onCloseForm={() => setIsReviewOpen(false)}
               onSummaryChange={(summary) =>
                 setProduct((current) =>
                   current
@@ -846,19 +811,9 @@ export default function ProductDetailsPage({ initialProduct = null }) {
         </section>
       </div>
 
-      {/* Mobile Sticky Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 w-full max-w-[100vw] overflow-hidden border-t border-zinc-200 bg-white/95 p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
-        {isExternalProduct ? (
-          <a
-            href={product.externalUrl}
-            target="_blank"
-            rel="nofollow sponsored noopener noreferrer"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-amber-600 text-sm font-medium text-white shadow-sm"
-          >
-            {externalButtonText}
-            <FiArrowUpRight aria-hidden="true" size={16} />
-          </a>
-        ) : (
+      {/* Mobile Sticky Bar (not shown for Amazon/external products) */}
+      {!isExternalProduct && (
+        <div className="fixed inset-x-0 bottom-0 z-40 w-full max-w-[100vw] overflow-hidden border-t border-zinc-200 bg-white/95 p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
           <div className="flex w-full min-w-0 items-center gap-2.5">
             <div className="min-w-0 shrink-0">
               <p className="text-lg font-bold text-zinc-950">
@@ -888,8 +843,8 @@ export default function ProductDetailsPage({ initialProduct = null }) {
                     : "Add to Cart"}
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

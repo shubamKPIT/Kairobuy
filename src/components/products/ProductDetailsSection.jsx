@@ -82,7 +82,7 @@ export default function ProductDetailsSection({ product }) {
             </span>
           </h3>
 
-          <dl className="mt-2 grid w-full min-w-0 grid-cols-1 gap-x-8 sm:grid-cols-2">
+          <dl className="mt-2 grid w-full min-w-0 grid-cols-2 gap-x-4 sm:gap-x-8">
             {specifications.map((row, index) => (
               <div
                 key={`${row.label}-${index}`}
