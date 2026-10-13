@@ -18,6 +18,8 @@ const EASE_OUT = [0.22, 1, 0.36, 1];
 const EASE_WIPE = [0.76, 0, 0.24, 1];
 const WIPE_TIME = 1.1;
 
+
+
 /*
   Each slide has 2 small cards (shown on mobile, fills the bottom gap).
   Swap `image` for real product thumbnails whenever you have them.
@@ -84,6 +86,9 @@ const slides = [
     ],
   },
 ];
+
+
+
 
 /* ---------- Optimised hero images ---------- */
 
@@ -283,7 +288,7 @@ export default function Hero() {
       {/* ---------- CONTENT ---------- */}
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-5 pb-48 pt-16 min-[400px]:pb-52 sm:px-6 sm:pb-24 sm:pt-0 lg:px-8 lg:pb-0">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentSlide.id}
             variants={content}
@@ -367,7 +372,7 @@ export default function Hero() {
       {/* ---------- MOBILE PRODUCT CARDS (fills bottom gap) ---------- */}
 
       <div className="absolute inset-x-0 bottom-9 z-20 px-5 sm:hidden">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentSlide.id}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
