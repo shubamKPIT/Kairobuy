@@ -36,6 +36,8 @@ import {
   cleanProductDetails,
 } from "../../../data/productDetailTemplates";
 
+const PAGE_SIZE = 20;
+
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -1106,6 +1108,12 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Browse filters: department -> subcategory, plus sorting and paging
+  const [selectedDepartment, setSelectedDepartment] = useState(""); // "" = all
+  const [selectedSubcategory, setSelectedSubcategory] = useState(""); // "" = all
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -1149,36 +1157,114 @@ export default function AdminProductsPage() {
     loadProducts();
   }, []);
 
+  const departmentCounts = useMemo(() => {
+    const counts = {};
+
+    products.forEach((product) => {
+      const key = product.department || "ALL";
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    return counts;
+  }, [products]);
+
+  const subcategoryCounts = useMemo(() => {
+    const counts = {};
+
+    if (!selectedDepartment) {
+      return counts;
+    }
+
+    products
+      .filter((product) => (product.department || "ALL") === selectedDepartment)
+      .forEach((product) => {
+        const key = product.subcategory || "__none__";
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+    return counts;
+  }, [products, selectedDepartment]);
+
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return products;
-    }
+    const result = products.filter((product) => {
+      if (
+        selectedDepartment &&
+        (product.department || "ALL") !== selectedDepartment
+      ) {
+        return false;
+      }
 
-    return products.filter((product) => {
-      return (
-        String(product.name || "")
+      if (selectedSubcategory) {
+        const subcategory = product.subcategory || "__none__";
+
+        if (subcategory !== selectedSubcategory) {
+          return false;
+        }
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return [
+        product.name,
+        product.brand,
+        product.category,
+        product.department,
+        product.subcategory,
+        product.source,
+      ].some((field) =>
+        String(field || "")
           .toLowerCase()
-          .includes(normalizedSearch) ||
-        String(product.brand || "")
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        String(product.category || "")
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        String(product.department || "")
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        String(product.subcategory || "")
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        String(product.source || "")
-          .toLowerCase()
-          .includes(normalizedSearch)
+          .includes(normalizedSearch),
       );
     });
-  }, [products, searchTerm]);
+
+    return [...result].sort((a, b) => {
+      if (sortBy === "name") {
+        return String(a.name || "").localeCompare(String(b.name || ""));
+      }
+
+      // Mongo _ids contain a timestamp, so this works even without createdAt
+      const aKey = String(a.createdAt || a._id);
+      const bKey = String(b.createdAt || b._id);
+
+      return sortBy === "oldest"
+        ? aKey.localeCompare(bKey)
+        : bKey.localeCompare(aKey);
+    });
+  }, [products, searchTerm, selectedDepartment, selectedSubcategory, sortBy]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PAGE_SIZE),
+  );
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+
+    return filteredProducts.slice(start, start + PAGE_SIZE);
+  }, [filteredProducts, currentPage]);
+
+  // Go back to page 1 whenever the filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDepartment, selectedSubcategory, sortBy]);
+
+  // If products get deleted and the current page no longer exists, step back
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const handleSelectDepartment = (key) => {
+    setSelectedDepartment(key);
+    setSelectedSubcategory(""); // reset step 2 when step 1 changes
+  };
+
   const openProductEditor = (product) => {
     const images = getProductImages(product);
 
@@ -1728,6 +1814,127 @@ export default function AdminProductsPage() {
         </button>
       </section>
 
+      <section className="mt-4 space-y-4 rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm">
+        {/* Step 1: Department */}
+        <div>
+          <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-zinc-500">
+            1. Department
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleSelectDepartment("")}
+              className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                selectedDepartment === ""
+                  ? "border-zinc-950 bg-zinc-950 text-white"
+                  : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+              }`}
+            >
+              All ({products.length})
+            </button>
+
+            {departmentOptions.map((department) => (
+              <button
+                key={department.key}
+                type="button"
+                onClick={() => handleSelectDepartment(department.key)}
+                className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                  selectedDepartment === department.key
+                    ? "border-violet-600 bg-violet-600 text-white"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                }`}
+              >
+                {department.title} ({departmentCounts[department.key] || 0})
+              </button>
+            ))}
+
+            {departmentCounts.ALL > 0 && (
+              <button
+                type="button"
+                onClick={() => handleSelectDepartment("ALL")}
+                className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                  selectedDepartment === "ALL"
+                    ? "border-amber-600 bg-amber-600 text-white"
+                    : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                }`}
+              >
+                Unassigned ({departmentCounts.ALL})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Step 2: Subcategory (only after a real department is chosen) */}
+        {selectedDepartment && selectedDepartment !== "ALL" && (
+          <div>
+            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-zinc-500">
+              2. Subcategory
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedSubcategory("")}
+                className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                  selectedSubcategory === ""
+                    ? "border-zinc-950 bg-zinc-950 text-white"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                }`}
+              >
+                All in {selectedDepartment}
+              </button>
+
+              {getSubcategoryOptions(selectedDepartment).map((subcategory) => (
+                <button
+                  key={subcategory.slug}
+                  type="button"
+                  onClick={() => setSelectedSubcategory(subcategory.slug)}
+                  className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                    selectedSubcategory === subcategory.slug
+                      ? "border-violet-600 bg-violet-600 text-white"
+                      : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  {subcategory.title} ({subcategoryCounts[subcategory.slug] || 0})
+                </button>
+              ))}
+
+              {subcategoryCounts.__none__ > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubcategory("__none__")}
+                  className={`rounded-full border px-4 py-2 text-xs font-extrabold transition ${
+                    selectedSubcategory === "__none__"
+                      ? "border-amber-600 bg-amber-600 text-white"
+                      : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  }`}
+                >
+                  No subcategory ({subcategoryCounts.__none__})
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Sort + result count */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-4">
+          <p className="text-xs font-bold text-zinc-500">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
+
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value)}
+            className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-bold text-zinc-700 outline-none"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="name">Name A → Z</option>
+          </select>
+        </div>
+      </section>
+
       <section className="mt-6 overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
         {isLoading ? (
           <div className="space-y-3 p-6">
@@ -1750,7 +1957,7 @@ export default function AdminProductsPage() {
               </h2>
 
               <p className="mt-2 text-sm text-zinc-500">
-                Try another search term or add a new product.
+                Try another search term or filter, or add a new product.
               </p>
             </div>
           </div>
@@ -1770,7 +1977,7 @@ export default function AdminProductsPage() {
                 </thead>
 
                 <tbody className="divide-y divide-zinc-100">
-                  {filteredProducts.map((product) => {
+                  {paginatedProducts.map((product) => {
                     const isExternalProduct =
                       product.purchaseMode === "EXTERNAL_LINK" ||
                       product.source === "AMAZON";
@@ -1911,7 +2118,7 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="space-y-4 p-4 md:hidden">
-              {filteredProducts.map((product) => {
+              {paginatedProducts.map((product) => {
                 const isExternalProduct =
                   product.purchaseMode === "EXTERNAL_LINK" ||
                   product.source === "AMAZON";
@@ -2041,6 +2248,34 @@ export default function AdminProductsPage() {
                 );
               })}
             </div>
+
+            {filteredProducts.length > PAGE_SIZE && (
+              <div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-xs font-extrabold text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+
+                <span className="text-xs font-bold text-zinc-500">
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((page) => Math.min(totalPages, page + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-xs font-extrabold text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         )}
       </section>
