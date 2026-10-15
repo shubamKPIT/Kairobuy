@@ -1,36 +1,34 @@
-# Roto
+# Kairobuy
 
-A modern e-commerce storefront built with **Next.js**. Roto offers a clean shopping experience across fashion, footwear, home essentials, and accessories, with category browsing, price filters, a wishlist, and a shopping bag.
+A modern e-commerce storefront built with **Next.js**. Kairobuy offers a clean shopping experience across fashion, footwear, home essentials, and accessories, with category browsing, price filters, a wishlist, and a shopping bag.
 
-**Live demo:** [roto-next.vercel.app](https://roto-next.vercel.app)
+**Live site:** [kairobuy.com](https://kairobuy.com)
 
 ---
 
 ## Features
 
-- **Category browsing:** Men, Women, Kids, Home, Accessories, All Products, and New Drops
+- **Department browsing:** Men, Women, Kids, Home, Accessories, All Products, and New Drops
 - **Price filters:** Under ₹1,000, ₹1,000 – ₹3,000, ₹3,000 – ₹5,000, ₹5,000 – ₹10,000, and above ₹10,000
-- **Sorting:** sort products by newest and more
+- **Featured offers:** Weekend Sale, New Season, and Premium Picks collections on the home page
 - **Shopping bag:** add, remove, and update items
 - **Wishlist:** save products for later
 - **Location selector:** set your delivery location
 - **Order tracking:** check shipment status with an order number
-- **Help pages:** Shipping, Returns, Size Guide, Contact, Privacy Policy, Terms, and Cookies
+- **Help and legal pages:** Shipping, Returns, Size Guide, Contact, Affiliate Disclosure, Privacy Policy, Terms, and Cookies
 - **Responsive design:** works on mobile, tablet, and desktop
 
 ## Tech Stack
 
-| Area        | Technology                                  |
-| ----------- | ------------------------------------------- |
-| Framework   | [Next.js](https://nextjs.org) (App Router)  |
-| UI library  | [React](https://react.dev)                  |
-| Styling     | [Tailwind CSS](https://tailwindcss.com) (via PostCSS) |
-| Fonts       | [Geist](https://vercel.com/font) via `next/font` |
-| Linting     | ESLint                                      |
-| Media       | Vercel Blob Storage (banners)               |
-| Deployment  | [Vercel](https://vercel.com)                |
-
-> Update this table to match your actual dependencies (database, auth, payment gateway, etc.).
+| Area       | Technology                                  |
+| ---------- | ------------------------------------------- |
+| Framework  | [Next.js](https://nextjs.org) (App Router)  |
+| UI library | [React](https://react.dev)                  |
+| Styling    | [Tailwind CSS](https://tailwindcss.com) via PostCSS |
+| Database   | [MongoDB Atlas](https://www.mongodb.com/atlas) |
+| Image storage | [Vercel Blob](https://vercel.com/docs/vercel-blob) |
+| Linting    | ESLint                                      |
+| Hosting    | [Hostinger](https://www.hostinger.com)      |
 
 ## Getting Started
 
@@ -43,95 +41,86 @@ A modern e-commerce storefront built with **Next.js**. Roto offers a clean shopp
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/gulatirahul569/Roto-Next.git
-cd Roto-Next
+git clone https://github.com/shubamKPIT/Kairobuy.git
+cd Kairobuy
 
 # 2. Install dependencies
 npm install
 
-# 3. Set up environment variables
-cp .env.example .env.local
-# then fill in the values (see below)
-
-# 4. Start the development server
+# 3. Start the development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open <http://localhost:3000> in your browser.
 
 ### Environment Variables
 
-Create a `.env.local` file in the project root. Never commit this file.
+Create a `.env.local` file in the project root (never commit it). Variable names below are typical examples; match them to what your code actually reads.
 
-```env
-# Example, replace with the variables your project actually uses
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-DATABASE_URL=
+```
+MONGODB_URI=
 BLOB_READ_WRITE_TOKEN=
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-| Variable                | Description                              | Required |
-| ----------------------- | ---------------------------------------- | -------- |
-| `NEXT_PUBLIC_SITE_URL`  | Public URL of the site                   | Yes      |
-| `DATABASE_URL`          | Database connection string               | Yes      |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads      | Optional |
+| Variable                | Description                                  | Required |
+| ----------------------- | -------------------------------------------- | -------- |
+| `MONGODB_URI`           | MongoDB Atlas connection string              | Yes      |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads/storage  | Yes      |
+| `NEXT_PUBLIC_SITE_URL`  | Public URL of the site                       | Yes      |
 
-> Edit this list to match your project. Tip: commit a `.env.example` file with empty values so others know what to set.
+> Tip: commit a `.env.example` file with empty values so others know what to set.
 
 ## Available Scripts
 
-| Command           | Description                          |
-| ----------------- | ------------------------------------ |
-| `npm run dev`     | Start the development server         |
-| `npm run build`   | Create an optimized production build |
-| `npm run start`   | Run the production build             |
-| `npm run lint`    | Check code with ESLint               |
+| Command         | Description                          |
+| --------------- | ------------------------------------ |
+| `npm run dev`   | Start the development server         |
+| `npm run build` | Create an optimized production build |
+| `npm run start` | Run the production build             |
+| `npm run lint`  | Check code with ESLint               |
 
-The `scripts/` folder contains helper scripts. Document what each one does here, for example:
-
-```bash
-node scripts/<script-name>.js
-```
+The `scripts/` folder contains helper scripts for maintenance tasks.
 
 ## Project Structure
 
 ```
-Roto-Next/
-├── public/            # Static assets (images, videos, logos)
-├── scripts/           # Utility / maintenance scripts
-├── src/
-│   ├── app/           # App Router pages, layouts, and API routes
-│   ├── components/    # Reusable UI components
-│   └── ...            # Hooks, utilities, data helpers
-├── eslint.config.mjs  # ESLint configuration
-├── jsconfig.json      # Path aliases
-├── next.config.mjs    # Next.js configuration
-├── postcss.config.mjs # PostCSS / Tailwind configuration
+Kairobuy/
+├── public/             # Static assets (images, logos)
+├── scripts/            # Utility / maintenance scripts
+├── src/                # Application source (pages, components, helpers)
+├── eslint.config.mjs   # ESLint configuration
+├── jsconfig.json       # Path aliases
+├── next.config.mjs     # Next.js configuration
+├── postcss.config.mjs  # PostCSS / Tailwind configuration
 └── package.json
 ```
 
-> Adjust the `src/` breakdown to match your actual folders.
-
 ## Deployment
 
-The easiest way to deploy is with [Vercel](https://vercel.com):
+Kairobuy is hosted on [Hostinger](https://www.hostinger.com) at [kairobuy.com](https://kairobuy.com).
 
 1. Push your code to GitHub.
-2. Import the repository in Vercel.
-3. Add your environment variables under **Project → Settings → Environment Variables**.
-4. Deploy. Every push to `main` creates a new production deployment.
+2. In Hostinger's hPanel, create or open the Node.js web app for the domain and connect this GitHub repository (or upload the project files).
+3. Set the Node.js version (18.18 or later) and add your environment variables (`MONGODB_URI`, `BLOB_READ_WRITE_TOKEN`, etc.) in the app settings.
+4. Use these commands:
+   - Install: `npm install`
+   - Build: `npm run build`
+   - Start: `npm run start`
+5. Redeploy after each push to `main` to publish the latest changes.
 
-To use a custom domain, go to **Project → Settings → Domains** and follow the DNS instructions.
+> Make sure your MongoDB instance allows connections from your Hostinger server's IP (for MongoDB Atlas, add it under Network Access).
+>
+> The exact menu names in hPanel depend on your Hostinger plan (shared/Cloud Node.js hosting or VPS), so adjust these steps to match your setup.
 
 ## Roadmap
 
 - [ ] Product search with suggestions
-- [ ] Server-rendered product and category pages for better SEO
 - [ ] Per-page SEO metadata, sitemap, and Product structured data
 - [ ] Secure order tracking (order number plus email or phone)
 - [ ] Payment gateway integration
 - [ ] User accounts and order history
-- [ ] Automated tests (Playwright)
+- [ ] Automated tests
 
 ## Contributing
 
@@ -145,9 +134,8 @@ Contributions are welcome.
 
 ## Author
 
-**Rahul Gulati**
-GitHub: [@gulatirahul569](https://github.com/gulatirahul569/Roto-Next)
+**Rahul Gulati** — [@gulatirahul569](https://github.com/gulatirahul569)
 
 ---
 
-*Product images and brand assets shown in the demo are for demonstration purposes. Make sure you have the rights to any images used in production.*
+*Product images and brand assets are for demonstration purposes. Make sure you have the rights to any images used in production.*
