@@ -9,11 +9,14 @@ import {
   FiEye,
   FiEyeOff,
   FiLock,
-  FiLogIn,
+  FiArrowRight,
+  FiShoppingBag,
   FiMail,
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
-import AuthLayout from "../../components/auth/AuthLayout";
+
+const inputClass =
+  "w-full rounded-sm border border-zinc-300 bg-white py-3 pl-11 pr-4 text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -100,8 +103,8 @@ export default function LoginForm() {
 
   if (!isAuthLoaded) {
     return (
-      <main className="grid min-h-screen place-items-center bg-zinc-950">
-        <p className="text-sm font-semibold text-zinc-300">
+      <main className="grid min-h-screen place-items-center bg-zinc-50">
+        <p className="text-sm font-semibold text-zinc-600">
           Loading account...
         </p>
       </main>
@@ -109,108 +112,165 @@ export default function LoginForm() {
   }
 
   return (
-    <AuthLayout
-      title="Welcome back."
-      subtitle="Login to access your wishlist, orders, and checkout."
-      footerText="Don't have an account?"
-      footerLinkText="Create one"
-      footerLinkHref="/register"
-    >
-      {errorMessage && (
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-400/30 bg-red-500/15 px-4 py-3 text-sm text-red-100">
-          <FiAlertCircle size={18} className="mt-0.5 shrink-0" />
-          <p>{errorMessage}</p>
+    <section className="flex h-screen overflow-hidden bg-white text-zinc-900">
+      {/* Left 60%: image panel (hidden on mobile) */}
+      <div
+        className="relative hidden bg-cover bg-center bg-no-repeat lg:block lg:w-[60%]"
+        style={{ backgroundImage: "url('https://images.pexels.com/photos/7081100/pexels-photo-7081100.jpeg')" }}
+      >
+        <div className="absolute inset-0 bg-black/60" />
+
+        <Link
+          href="/"
+          className="absolute left-14 top-8 z-20 flex items-center gap-2.5 text-2xl font-extrabold uppercase tracking-[0.15em] text-white"
+        >
+          <FiShoppingBag size={26} />
+          Kairobuy
+        </Link>
+
+        <div className="relative z-10 flex h-full flex-col justify-center px-14 text-white">
+          <div className="max-w-xl">
+            <h2 className="text-5xl font-bold leading-tight">
+              Your next favorite find starts here.
+            </h2>
+            <p className="mt-5 max-w-md text-lg text-white/80">
+              Save your favorites, track your orders, and check out in a few
+              taps with your Kairobuy account.
+            </p>
+          </div>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <label className="block">
-          <span className="mb-2 block text-sm font-bold text-zinc-100">
-            Email address
-          </span>
+        <p className="absolute bottom-8 left-14 z-20 text-sm text-white/60">
+          &copy; 2026 Kairobuy
+        </p>
+      </div>
 
-          <div className="relative">
-            <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+      {/* Right 40%: login (light theme) */}
+      <div className="flex w-full items-center justify-center overflow-y-auto bg-white px-6 py-6 lg:w-[40%]">
+        <div className="w-full max-w-[400px]">
+          {/* Brand link on mobile (image panel is hidden there) */}
+          <Link
+            href="/"
+            className="mb-6 flex items-center gap-2 text-lg font-extrabold uppercase tracking-[0.15em] text-zinc-900 lg:hidden"
+          >
+            <FiShoppingBag size={20} />
+            Kairobuy
+          </Link>
 
-            <input
-              type="email"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/15 bg-white/10 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-zinc-400 focus:border-white/50 focus:bg-white/15"
+          <h1 className="text-3xl font-bold text-zinc-900">Log in</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Welcome back. Enter your details to continue.
+          </p>
+
+          {errorMessage && (
+            <div
+              role="alert"
+              className="mt-5 flex items-start gap-3 rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+            >
+              <FiAlertCircle size={18} className="mt-0.5 shrink-0" />
+              <p>{errorMessage}</p>
+            </div>
+          )}
+
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() =>
+                setErrorMessage("Google login failed. Please try again.")
+              }
+              theme="outline"
+              shape="rectangular"
+              size="large"
+              text="continue_with"
+              width="400"
             />
           </div>
-        </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-bold text-zinc-100">
-            Password
-          </span>
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-zinc-200" />
+            <span className="text-xs text-zinc-500">or log in with email</span>
+            <div className="h-px flex-1 bg-zinc-200" />
+          </div>
 
-          <div className="relative">
-            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                Email
+              </label>
+              <div className="relative">
+                <FiMail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className={inputClass}
+                />
+              </div>
+            </div>
 
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className="w-full rounded-xl border border-white/15 bg-white/10 py-3 pl-11 pr-12 text-sm text-white outline-none transition placeholder:text-zinc-400 focus:border-white/50 focus:bg-white/15"
-            />
+            <div className="mb-5">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                Password
+              </label>
+              <div className="relative">
+                <FiLock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className={`${inputClass} pr-12`}
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
+            </div>
 
             <button
-              type="button"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white"
+              type="submit"
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-zinc-900 py-3.5 text-sm font-bold text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              {isLoading ? "Logging in..." : "Log in"}
+              {!isLoading && <FiArrowRight size={17} />}
             </button>
-          </div>
-        </label>
+          </form>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-extrabold text-zinc-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <FiLogIn size={17} />
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <p className="mt-5 text-center text-sm text-zinc-500">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-bold text-zinc-900 hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
 
-      <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/20" />
-
-        <span className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
-          Or
-        </span>
-
-        <div className="h-px flex-1 bg-white/20" />
+          <Link
+            href="/"
+            className="mt-3 block text-center text-xs font-medium text-zinc-400 transition hover:text-zinc-900"
+          >
+            Continue browsing as guest
+          </Link>
+        </div>
       </div>
-
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() =>
-            setErrorMessage("Google login failed. Please try again.")
-          }
-          theme="filled_black"
-          shape="pill"
-          text="continue_with"
-        />
-      </div>
-
-      <Link
-        href="/"
-        className="mt-7 block text-center text-xs font-semibold text-zinc-400 transition hover:text-white"
-      >
-        Continue browsing as guest
-      </Link>
-    </AuthLayout>
+    </section>
   );
 }

@@ -1,6 +1,15 @@
 import "./globals.css";
 import AppProviders from "../context/AppProviders";
 import StorefrontShell from "../components/layout/StorefrontShell";
+import { Jost } from "next/font/google";
+import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import PromoCard from "@/components/layout/PromoCard";
+
+const mainFont = Jost({
+  subsets: ["latin"],
+  variable: "--font-main",
+  display: "swap",
+});
 
 export const metadata = {
   metadataBase: new URL("https://kairobuy.com"),
@@ -16,10 +25,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={mainFont.variable}>
       <body>
         <AppProviders>
           <StorefrontShell>{children}</StorefrontShell>
+          <WhatsAppButton />
+          <PromoCard />
         </AppProviders>
       </body>
     </html>

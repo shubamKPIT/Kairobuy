@@ -12,6 +12,8 @@ import HomePromoBanners from "@/components/home/HomePromoBanners";
 import ShopByBudget from "@/components/home/ShopByBudget";
 import SmallAnimatedpromo from "@/components/home/SmallAnimatedPromo";
 import Testimonials from "@/components/home/Testimonials";
+import ShopByLook from "@/components/home/ShopByLook";
+import ReviewsDrawerLoader from "@/components/home/Reviewdrawerloader";
 
 
 export default function HomePage() {
@@ -25,7 +27,9 @@ export default function HomePage() {
       />
       <HomePromoBanners />
       <NewDrops />
+      <ShopByLook />
       <ShopByBudget />
+      <ReviewsDrawerLoader />
       <Testimonials />
       <LifestyleVideo />
     </>
