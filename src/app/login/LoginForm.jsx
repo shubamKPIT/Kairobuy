@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
@@ -18,6 +18,8 @@ import { useAuth } from "../../context/AuthContext";
 const inputClass =
   "w-full rounded-sm border border-zinc-300 bg-white py-3 pl-11 pr-4 text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900";
 
+const BG_IMAGE = "url('https://images.pexels.com/photos/7081100/pexels-photo-7081100.jpeg')";
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,6 +36,23 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const redirectPath = searchParams.get("next") || "/";
+
+  // Google button needs a pixel width (max 400): fit it to its container
+  const googleWrapRef = useRef(null);
+  const [googleWidth, setGoogleWidth] = useState(400);
+
+  useEffect(() => {
+    const el = googleWrapRef.current;
+    if (!el) return;
+
+    const update = () =>
+      setGoogleWidth(Math.max(200, Math.min(400, Math.floor(el.clientWidth))));
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isAuthLoaded]);
 
   useEffect(() => {
     if (isAuthLoaded && user) {
@@ -101,6 +120,20 @@ export default function LoginForm() {
     }
   };
 
+  // Keep GoogleLogin's callbacks stable. If they change on every render,
+  // the library re-runs google.accounts.id.initialize() each time.
+  const googleSuccessRef = useRef(handleGoogleSuccess);
+  googleSuccessRef.current = handleGoogleSuccess;
+
+  const onGoogleSuccess = useCallback(
+    (credentialResponse) => googleSuccessRef.current(credentialResponse),
+    []
+  );
+
+  const onGoogleError = useCallback(() => {
+    setErrorMessage("Google login failed. Please try again.");
+  }, []);
+
   if (!isAuthLoaded) {
     return (
       <main className="grid min-h-screen place-items-center bg-zinc-50">
@@ -112,11 +145,19 @@ export default function LoginForm() {
   }
 
   return (
-    <section className="flex h-screen overflow-hidden bg-white text-zinc-900">
+    <section className="relative flex h-screen overflow-hidden bg-white text-zinc-900">
+      {/* Mobile only: image as full-screen background behind the form */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat lg:hidden"
+        style={{ backgroundImage: BG_IMAGE }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+      </div>
+
       {/* Left 60%: image panel (hidden on mobile) */}
       <div
         className="relative hidden bg-cover bg-center bg-no-repeat lg:block lg:w-[60%]"
-        style={{ backgroundImage: "url('https://images.pexels.com/photos/7081100/pexels-photo-7081100.jpeg')" }}
+        style={{ backgroundImage: BG_IMAGE }}
       >
         <div className="absolute inset-0 bg-black/60" />
 
@@ -145,13 +186,13 @@ export default function LoginForm() {
         </p>
       </div>
 
-      {/* Right 40%: login (light theme) */}
-      <div className="flex w-full items-center justify-center overflow-y-auto bg-white px-6 py-6 lg:w-[40%]">
-        <div className="w-full max-w-[400px]">
+      {/* Right 40%: login (transparent over image on mobile, white on desktop) */}
+      <div className="relative z-10 flex w-full items-center justify-center overflow-y-auto bg-transparent px-6 py-6 lg:w-[40%] lg:bg-white">
+        <div className="w-full max-w-[400px] rounded-2xl bg-white/95 p-6 shadow-2xl backdrop-blur-sm sm:p-8 lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
           {/* Brand link on mobile (image panel is hidden there) */}
           <Link
             href="/"
-            className="mb-6 flex items-center gap-2 text-lg font-extrabold uppercase tracking-[0.15em] text-zinc-900 lg:hidden"
+            className="mb-5 flex items-center gap-2 text-lg font-extrabold uppercase tracking-[0.15em] text-zinc-900 lg:hidden"
           >
             <FiShoppingBag size={20} />
             Kairobuy
@@ -172,17 +213,15 @@ export default function LoginForm() {
             </div>
           )}
 
-          <div className="mt-6 flex justify-center">
+          <div ref={googleWrapRef} className="mt-6 flex w-full justify-center overflow-hidden">
             <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() =>
-                setErrorMessage("Google login failed. Please try again.")
-              }
+              onSuccess={onGoogleSuccess}
+              onError={onGoogleError}
               theme="outline"
               shape="rectangular"
               size="large"
               text="continue_with"
-              width="400"
+              width={googleWidth}
             />
           </div>
 
