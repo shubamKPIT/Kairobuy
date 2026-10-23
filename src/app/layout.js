@@ -2,7 +2,7 @@ import "./globals.css";
 import AppProviders from "../context/AppProviders";
 import StorefrontShell from "../components/layout/StorefrontShell";
 import { Jost } from "next/font/google";
-import WhatsAppButton from "@/components/layout/WhatsAppButton";
+// import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import PromoCard from "@/components/layout/PromoCard";
 
 const mainFont = Jost({
@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
       <body>
         <AppProviders>
           <StorefrontShell>{children}</StorefrontShell>
-          <WhatsAppButton />
+          {/* <WhatsAppButton /> */}
           <PromoCard />
         </AppProviders>
       </body>
