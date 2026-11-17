@@ -2,80 +2,17 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { requireAdmin, requireUser } from "../../../lib/auth";
 import { connectDatabase } from "../../../lib/db";
+import {
+  buildTrustedItems,
+  calculateTotals,
+  createHttpError,
+} from "../../../lib/orderPricing";
 import Order from "../../../models/Order";
 import Product from "../../../models/Product";
 import "../../../models/User";
 import razorpayInstance from "../../../lib/razorpay";
 
 export const runtime = "nodejs";
-
-function createHttpError(message, status) {
-  const error = new Error(message);
-  error.status = status;
-  return error;
-}
-
-function toQuantity(value) {
-  const quantity = Math.floor(Number(value));
-
-  return Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
-}
-
-const FREE_SHIPPING_ABOVE = 5000;
-const SHIPPING_CHARGE = 199;
-
-/*
-  Builds order items from the DATABASE, not from the browser.
-
-  The browser only tells us which product, size and quantity.
-  Name, image and price always come from the product record, so a
-  customer cannot change prices by editing the request.
-*/
-async function buildTrustedItems(items) {
-  const trustedItems = [];
-
-  for (const item of items) {
-    const productId = String(item?.productId || item?._id || "");
-    const quantity = toQuantity(item?.quantity);
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      throw createHttpError("A product in your bag is invalid.", 400);
-    }
-
-    if (quantity < 1 || quantity > 20) {
-      throw createHttpError("Invalid quantity in your bag.", 400);
-    }
-
-    const product = await Product.findById(productId)
-      .select("name image price isActive purchaseMode source")
-      .lean();
-
-    if (!product || product.isActive === false) {
-      throw createHttpError(
-        `${item?.name || "A product"} is no longer available.`,
-        404
-      );
-    }
-
-    if (product.purchaseMode === "EXTERNAL_LINK" || product.source === "AMAZON") {
-      throw createHttpError(
-        `${product.name} is sold on a partner website and cannot be ordered here.`,
-        400
-      );
-    }
-
-    trustedItems.push({
-      productId,
-      name: product.name,
-      image: product.image,
-      price: Number(product.price || 0),
-      quantity,
-      selectedSize: String(item?.selectedSize || "").trim(),
-    });
-  }
-
-  return trustedItems;
-}
 
 /*
   Confirms with Razorpay (using the secret key, server to server) that the
@@ -274,13 +211,7 @@ export async function POST(request) {
     // Prices come from the database, totals are calculated here
     const orderItems = await buildTrustedItems(items);
 
-    const subtotal = orderItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    const shippingCharge = subtotal > FREE_SHIPPING_ABOVE ? 0 : SHIPPING_CHARGE;
-    const total = subtotal + shippingCharge;
+    const { subtotal, shippingCharge, total } = calculateTotals(orderItems);
 
     const method = paymentMethod === "online" ? "online" : "cod";
     let paymentStatus = "Pending";

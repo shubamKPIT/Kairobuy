@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "../../../../../lib/auth";
+import { connectDatabase } from "../../../../../lib/db";
 import razorpayInstance from "../../../../../lib/razorpay";
+import {
+  buildTrustedItems,
+  calculateTotals,
+  createHttpError,
+} from "../../../../../lib/orderPricing";
 
 export const runtime = "nodejs";
 
@@ -19,22 +25,25 @@ export async function POST(request) {
 
     await requireUser(request);
 
-    const { amount } = await request.json();
+    const { items } = await request.json();
 
-    // The final amount is re-checked against the cart when the order is saved
-    if (!Number.isFinite(Number(amount)) || amount <= 0 || amount > 500000) {
-      return NextResponse.json(
-        {
-          message: "Invalid amount",
-        },
-        {
-          status: 400,
-        }
-      );
+    if (!Array.isArray(items) || items.length === 0) {
+      throw createHttpError("Cart is empty", 400);
+    }
+
+    await connectDatabase();
+
+    // The amount is calculated here from database prices.
+    // Nothing about the price is taken from the browser.
+    const orderItems = await buildTrustedItems(items);
+    const { total } = calculateTotals(orderItems);
+
+    if (!Number.isFinite(total) || total <= 0 || total > 500000) {
+      throw createHttpError("Invalid amount", 400);
     }
 
     const options = {
-      amount: Math.round(amount * 100),
+      amount: Math.round(total * 100),
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };

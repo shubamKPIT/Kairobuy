@@ -1,25 +1,52 @@
 import { cache } from "react";
-import { notFound } from "next/navigation";
-import mongoose from "mongoose";
+import { notFound, permanentRedirect } from "next/navigation";
 import { connectDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 import ProductPageClient from "./ProductPageClient";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kairobuy.com";
 
+/*
+  The folder is still called [id], but the value in the URL is now the
+  product SLUG (/product/car-wash-shampoo).
+
+  Old links that still contain a product ID (/product/6afae8f7...) keep
+  working: the product is found by ID and the visitor is redirected to the
+  slug URL.
+*/
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(String(value || "")).trim();
+  } catch {
+    return "";
+  }
+}
+
 // cache() so metadata and page share one DB query per request
-const getProduct = cache(async (id) => {
-  if (!mongoose.isValidObjectId(id)) return null;
+const getProduct = cache(async (idOrSlug) => {
+  const value = safeDecode(idOrSlug);
+
+  if (!value) return null;
 
   await connectDatabase();
 
-  const doc = await Product.findOne({ _id: id, isActive: true })
+  const query = OBJECT_ID_PATTERN.test(value)
+    ? { _id: value, isActive: true }
+    : { slug: value.toLowerCase(), isActive: true };
+
+  const doc = await Product.findOne(query)
     .select("-vendor -amazon") // keep vendor/supplier details out of the page HTML
     .lean();
 
   // Convert ObjectId/Date values into plain JSON for the client component
   return doc ? JSON.parse(JSON.stringify(doc)) : null;
 });
+
+function getProductPath(product) {
+  return `/product/${product.slug || product._id}`;
+}
 
 function getTotalStock(product) {
   const sizes = Array.isArray(product.sizes) ? product.sizes : [];
@@ -46,7 +73,7 @@ export async function generateMetadata({ params }) {
     .slice(0, 160);
 
   const image = product.image || product.images?.[0];
-  const url = `${baseUrl}/product/${product._id}`;
+  const url = `${baseUrl}${getProductPath(product)}`;
 
   return {
     title,
@@ -75,11 +102,16 @@ export default async function ProductPage({ params }) {
 
   if (!product) notFound();
 
+  // Old ID links (or a different-case slug) go to the real slug URL
+  if (product.slug && id !== product.slug) {
+    permanentRedirect(getProductPath(product));
+  }
+
   const isExternal =
     product.purchaseMode === "EXTERNAL_LINK" || product.source === "AMAZON";
 
   const images = [product.image, ...(product.images || [])].filter(Boolean);
-  const url = `${baseUrl}/product/${product._id}`;
+  const url = `${baseUrl}${getProductPath(product)}`;
 
   // Product structured data (real data only)
   const jsonLd = {

@@ -55,7 +55,7 @@ function ProductMarqueeCard({ product }) {
 
   return (
     <Link
-      href={`/product/${product._id}`}
+      href={`/product/${product.slug || product._id}`}
       className="group/card relative block h-[340px] overflow-hidden border border-black/5 transition-transform duration-300 hover:-translate-y-2 sm:h-96"
     >
       {/* Product Image */}

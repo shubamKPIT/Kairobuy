@@ -31,7 +31,7 @@ export default function ProductCard({ product }) {
 
   const name = product.name || product.title || "Kairobuy product";
   const brand = product.brand || product.category || "Kairobuy";
-  const productHref = `/product/${product._id}`;
+  const productHref = `/product/${product.slug || product._id}`;
 
   const isAmazon = product.source === "AMAZON";
   const isExternal = product.purchaseMode === "EXTERNAL_LINK" || isAmazon;

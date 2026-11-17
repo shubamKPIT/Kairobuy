@@ -3,7 +3,7 @@ import Product from "@/models/Product";
 import { departmentData } from "@/data/departmentData";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kairobuy.com";
-const PRODUCT_URL_FIELD = "id";
+const identifier = PRODUCT_URL_FIELD === "slug" ? p.slug : String(p._id);
 
 // Rebuild the sitemap at most once per hour
 export const revalidate = 3600;
@@ -59,7 +59,7 @@ export default async function sitemap() {
     const products = await Product.find({ isActive: true }, "_id slug updatedAt").lean();
 
     productPages = products.map((p) => {
-      const identifier = PRODUCT_URL_FIELD === "slug" ? p.slug : String(p._id);
+      const identifier = PRODUCT_URL_FIELD === "slug" ? p.slug || String(p._id) : String(p._id);
 
       return {
         url: `${baseUrl}/product/${identifier}`,

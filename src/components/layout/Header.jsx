@@ -514,7 +514,7 @@ export default function Header() {
                         <button
                           key={product._id}
                           type="button"
-                          onClick={() => handleSearchProductClick(product._id)}
+                          onClick={() => handleSearchProductClick(product.slug || product._id)}
                           className="flex w-full items-center gap-3 border-b border-zinc-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-zinc-50"
                         >
                           <div className="size-12 shrink-0 overflow-hidden rounded-xl bg-zinc-100">

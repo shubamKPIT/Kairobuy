@@ -216,7 +216,7 @@ export async function PUT(request, { params }) {
 
     const name = stringValue(body.name || body.title || product.name);
 
-    const slug = createSlug(body.slug || name || product.slug);
+    const slug = createSlug(body.slug || product.slug || name);
 
     const category = stringValue(body.category || product.category);
 

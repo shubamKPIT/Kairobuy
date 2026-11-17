@@ -4,9 +4,8 @@ import HelpPageLayout from "@/components/site/HelpPageLayout";
   BEFORE PUBLISHING, replace everything marked [BRACKETS] with your real
   numbers and details. Only keep promises you can actually meet:
   - [X-Y] processing and delivery days
-  - [FREE SHIPPING THRESHOLD] and [SHIPPING FEE], or remove that line
   - [SUPPORT EMAIL]
-  - Remove "Cash on delivery" and "International shipping" if not offered.
+  - [48 hours] damage reporting window
 */
 
 const sections = [
@@ -20,7 +19,7 @@ const sections = [
   {
     title: "Delivery timelines",
     body: [
-      "Estimated delivery time depends on your location, the product, and the seller’s dispatch location. Most orders arrive within [X-Y] business days after dispatch. Remote or hard-to-reach areas may take longer.",
+      "Estimated delivery time depends on your location, the product, and the seller\u2019s dispatch location. Most orders arrive within [X-Y] business days after dispatch. Remote or hard-to-reach areas may take longer.",
       "Delivery dates shown on the site or in emails are estimates, not guarantees. Delays can occur because of weather, courier disruptions, strikes, or other events outside our control.",
     ],
   },
@@ -39,7 +38,7 @@ const sections = [
   {
     title: "Shipping charges",
     body: [
-      "Applicable shipping charges, if any, are shown during checkout before you complete payment. Orders above [FREE SHIPPING THRESHOLD] may qualify for free shipping. Otherwise a shipping fee of [SHIPPING FEE] may apply. Charges can vary by location and product, and promotional offers may change them.",
+      "A flat shipping charge of \u20b930 applies to every order. The charge is shown at checkout before you complete payment. All prices include GST.",
     ],
   },
   {
@@ -69,7 +68,7 @@ const sections = [
   {
     title: "Orders from external sellers",
     body: [
-      "If you complete a purchase on an external seller or affiliate website, that seller’s own shipping terms apply, and we do not control their dispatch or delivery.",
+      "If you complete a purchase on an external seller or affiliate website, that seller\u2019s own shipping terms apply, and we do not control their dispatch or delivery.",
     ],
   },
 ];

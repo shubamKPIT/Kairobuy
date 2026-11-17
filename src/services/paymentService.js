@@ -1,9 +1,11 @@
 import { apiRequest } from "../lib/api";
 
-export function createRazorpayOrder(amount, token) {
+// The server calculates the amount from the cart items, so we send the
+// items (product, size, quantity) and not a price.
+export function createRazorpayOrder(items, token) {
   return apiRequest("/payments/razorpay/order", {
     method: "POST",
-    body: { amount },
+    body: { items },
     token,
   });
 }

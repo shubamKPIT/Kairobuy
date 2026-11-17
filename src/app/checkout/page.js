@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  FiAlertTriangle,
   FiCheckCircle,
   FiCreditCard,
+  FiInfo,
   FiLock,
   FiMapPin,
   FiPackage,
   FiShoppingBag,
   FiTruck,
-  FiUser,
   FiXCircle,
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
@@ -24,8 +23,8 @@ import {
 } from "../../services/paymentService";
 import { createOrder } from "../../services/orderService";
 
-// Set to false when real inventory is ready to accept delivery orders
-const ORDERS_UNDER_MAINTENANCE = true;
+// Flat shipping charge for every order
+const SHIPPING_CHARGE = 30;
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
@@ -74,7 +73,7 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [showGstInfo, setShowGstInfo] = useState(false);
 
   const [shipping, setShipping] = useState({
     fullName: "",
@@ -85,9 +84,7 @@ export default function CheckoutPage() {
     pincode: "",
   });
 
-  const shippingCharge = useMemo(() => {
-    return totalPrice > 5000 ? 0 : 199;
-  }, [totalPrice]);
+  const shippingCharge = SHIPPING_CHARGE;
 
   const total = totalPrice + shippingCharge;
 
@@ -259,7 +256,7 @@ export default function CheckoutPage() {
       );
     }
 
-    const paymentOrderResponse = await createRazorpayOrder(total, token);
+    const paymentOrderResponse = await createRazorpayOrder(cartItems, token);
 
     const razorpayOrder = paymentOrderResponse?.order;
     const razorpayKey = paymentOrderResponse?.key;
@@ -341,12 +338,6 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setErrorMessage("");
     setSuccessMessage("");
-
-    // Block all orders while delivery products are under maintenance
-    if (ORDERS_UNDER_MAINTENANCE) {
-      setShowMaintenanceModal(true);
-      return;
-    }
 
     if (!validateCheckout()) {
       return;
@@ -734,21 +725,35 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-500">Shipping</span>
                     <span className="font-semibold text-zinc-950">
-                      {shippingCharge === 0
-                        ? "Free"
-                        : formatPrice(shippingCharge)}
+                      {formatPrice(shippingCharge)}
                     </span>
                   </div>
 
-                  {totalPrice <= 5000 && (
-                    <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-                      Add {formatPrice(5001 - totalPrice)} more for free
-                      shipping.
-                    </p>
-                  )}
-
                   <div className="flex items-center justify-between border-t border-zinc-200 pt-4 text-lg">
-                    <span className="font-bold text-zinc-950">Total</span>
+                    <span className="relative flex items-center gap-2 font-bold text-zinc-950">
+                      Total
+                      <button
+                        type="button"
+                        aria-label="GST information"
+                        onClick={() => setShowGstInfo((prev) => !prev)}
+                        onMouseEnter={() => setShowGstInfo(true)}
+                        onMouseLeave={() => setShowGstInfo(false)}
+                        className="text-zinc-400 transition hover:text-zinc-950"
+                      >
+                        <FiInfo size={16} />
+                      </button>
+
+                      {showGstInfo && (
+                        <span
+                          role="tooltip"
+                          className="absolute bottom-full left-0 z-50 mb-3 whitespace-nowrap rounded-lg bg-zinc-950 px-3 py-2 text-xs font-medium leading-none text-white shadow-lg"
+                        >
+                          GST is already included in the price
+                          <span className="absolute left-[62px] top-full size-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-zinc-950" />
+                        </span>
+                      )}
+                    </span>
+
                     <span className="font-black text-zinc-950">
                       {formatPrice(total)}
                     </span>
@@ -780,57 +785,6 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
-
-      {/* Maintenance popup */}
-      {showMaintenanceModal && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/60 px-4 backdrop-blur-sm"
-          onClick={() => setShowMaintenanceModal(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="maintenance-title"
-        >
-          <div
-            className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mx-auto grid size-14 place-items-center rounded-full bg-amber-50 text-amber-600">
-              <FiAlertTriangle size={26} />
-            </div>
-
-            <h2
-              id="maintenance-title"
-              className="mt-5 text-2xl font-black tracking-tight text-zinc-950"
-            >
-              Delivery is under maintenance
-            </h2>
-
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              Our delivery products are currently under maintenance, so we
-              can&apos;t accept orders right now. Affiliate products are
-              working normally and will take you directly to the partner
-              website.
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/category/all?type=affiliate"
-                className="inline-flex justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-zinc-800"
-              >
-                Browse affiliate products
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => setShowMaintenanceModal(false)}
-                className="inline-flex justify-center rounded-full border border-zinc-200 px-5 py-3 text-sm font-extrabold text-zinc-700 transition hover:border-zinc-400"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
