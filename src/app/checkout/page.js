@@ -26,6 +26,10 @@ import { createOrder } from "../../services/orderService";
 // Flat shipping charge for every order
 const SHIPPING_CHARGE = 30;
 
+// Set NEXT_PUBLIC_COD_ENABLED=false in the environment to turn off
+// cash on delivery. Anything else (or not set) keeps it on.
+const COD_ENABLED = process.env.NEXT_PUBLIC_COD_ENABLED !== "false";
+
 function formatPrice(price) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -69,7 +73,7 @@ export default function CheckoutPage() {
   const { cartItems, totalPrice, clearCart } = useCart();
   const { location } = useLocation();
 
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [paymentMethod, setPaymentMethod] = useState(COD_ENABLED ? "cod" : "online");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -600,6 +604,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-4">
+                  {COD_ENABLED && (
                   <label
                     className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl border p-5 transition ${
                       paymentMethod === "cod"
@@ -625,6 +630,7 @@ export default function CheckoutPage() {
                       className="size-4 accent-zinc-950"
                     />
                   </label>
+                  )}
 
                   <label
                     className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl border p-5 transition ${
@@ -748,7 +754,7 @@ export default function CheckoutPage() {
                           role="tooltip"
                           className="absolute bottom-full left-0 z-50 mb-3 whitespace-nowrap rounded-lg bg-zinc-950 px-3 py-2 text-xs font-medium leading-none text-white shadow-lg"
                         >
-                          GST is already included in the price
+                          All prices include GST
                           <span className="absolute left-[62px] top-full size-0 border-x-[6px] border-t-[6px] border-x-transparent border-t-zinc-950" />
                         </span>
                       )}

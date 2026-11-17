@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { CiFacebook } from "react-icons/ci";
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaPinterest } from "react-icons/fa";
 import { LuYoutube } from "react-icons/lu";
-import { TbBrandTwitter } from "react-icons/tb";
 
 const shopLinks = [
   {
@@ -58,24 +57,60 @@ const helpLinks = [
   },
 ];
 
+/*
+  An item with an href becomes a link that opens in a new tab.
+  An item without an href is shown as plain text, so add the page
+  address here when you have it (Pinterest and YouTube below).
+*/
 const socialLinks = [
   {
     label: "Instagram",
     icon: FaInstagram,
+    href: "https://www.instagram.com/kairobuy/",
   },
   {
     label: "Facebook",
     icon: CiFacebook,
+    href: "https://www.facebook.com/kairobuy/",
   },
   {
-    label: "Twitter",
-    icon: TbBrandTwitter,
+    label: "Pinterest",
+    icon: FaPinterest,
+    href: "", // paste your Pinterest page address here
   },
   {
     label: "YouTube",
     icon: LuYoutube,
+    href: "",
   },
 ];
+
+function SocialLink({ social, iconSize, className }) {
+  const Icon = social.icon;
+
+  const content = (
+    <>
+      <Icon size={iconSize} />
+      {social.label}
+    </>
+  );
+
+  if (!social.href) {
+    return <span className={className}>{content}</span>;
+  }
+
+  return (
+    <a
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Kairobuy on ${social.label}`}
+      className={`${className} transition hover:text-white`}
+    >
+      {content}
+    </a>
+  );
+}
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -139,19 +174,15 @@ export default function Footer() {
             <h3 className="mb-3 text-sm font-semibold uppercase">Follow</h3>
 
             <ul className="space-y-2 text-left text-xs text-gray-400">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-
-                return (
-                  <li
-                    key={social.label}
+              {socialLinks.map((social) => (
+                <li key={social.label}>
+                  <SocialLink
+                    social={social}
+                    iconSize={14}
                     className="inline-flex items-center gap-1.5"
-                  >
-                    <Icon size={14} />
-                    {social.label}
-                  </li>
-                );
-              })}
+                  />
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -252,16 +283,15 @@ export default function Footer() {
             </h2>
 
             <ul className="space-y-3 text-sm text-gray-400">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-
-                return (
-                  <li key={social.label} className="flex items-center gap-2">
-                    <Icon size={18} />
-                    {social.label}
-                  </li>
-                );
-              })}
+              {socialLinks.map((social) => (
+                <li key={social.label}>
+                  <SocialLink
+                    social={social}
+                    iconSize={18}
+                    className="inline-flex items-center gap-2"
+                  />
+                </li>
+              ))}
             </ul>
           </div>
         </div>

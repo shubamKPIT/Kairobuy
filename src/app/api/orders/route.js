@@ -214,6 +214,15 @@ export async function POST(request) {
     const { subtotal, shippingCharge, total } = calculateTotals(orderItems);
 
     const method = paymentMethod === "online" ? "online" : "cod";
+
+    // Server-side switch for cash on delivery (set NEXT_PUBLIC_COD_ENABLED=false)
+    if (method === "cod" && process.env.NEXT_PUBLIC_COD_ENABLED === "false") {
+      throw createHttpError(
+        "Cash on delivery is currently unavailable. Please pay online.",
+        400
+      );
+    }
+
     let paymentStatus = "Pending";
 
     if (method === "online") {
