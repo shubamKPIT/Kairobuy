@@ -3,7 +3,6 @@ import Product from "@/models/Product";
 import { departmentData } from "@/data/departmentData";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kairobuy.com";
-const identifier = PRODUCT_URL_FIELD === "slug" ? p.slug : String(p._id);
 
 // Rebuild the sitemap at most once per hour
 export const revalidate = 3600;
@@ -50,24 +49,23 @@ export default async function sitemap() {
     });
   });
 
-  // 3. Product pages from MongoDB
+  // 3. Product pages from MongoDB (slug URLs, falling back to the ID)
   let productPages = [];
 
   try {
     await connectDatabase();
 
-    const products = await Product.find({ isActive: true }, "_id slug updatedAt").lean();
+    const products = await Product.find(
+      { isActive: true },
+      "_id slug updatedAt"
+    ).lean();
 
-    productPages = products.map((p) => {
-      const identifier = PRODUCT_URL_FIELD === "slug" ? p.slug || String(p._id) : String(p._id);
-
-      return {
-        url: `${baseUrl}/product/${identifier}`,
-        lastModified: p.updatedAt || now,
-        changeFrequency: "weekly",
-        priority: 0.7,
-      };
-    });
+    productPages = products.map((p) => ({
+      url: `${baseUrl}/product/${p.slug || String(p._id)}`,
+      lastModified: p.updatedAt || now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
   } catch (error) {
     console.error("Sitemap: could not load products", error);
   }
